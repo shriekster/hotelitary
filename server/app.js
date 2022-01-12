@@ -19,7 +19,7 @@ app.use(express.static(path.join(__dirname, '../client/build')));
 
 app.use('/api', apiRouter);
 
-app.all('/*', function(req, res) {
+app.all('*', function(req, res) {
 
     res.status(404).json({
         data: null,
@@ -27,6 +27,6 @@ app.all('/*', function(req, res) {
         message: 'Informația solicitată nu există!'
     });
 
-})
+});
 
 module.exports = app;

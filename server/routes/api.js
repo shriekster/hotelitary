@@ -3,6 +3,7 @@ const router = express.Router();
 
 const { db, err } = require('../db');
 
+/* Handle the database errors before responding to API requests */
 router.all('/*', function(req, res, next) {
 
   if (db && !err) {
@@ -29,7 +30,8 @@ router.get('/', function(req, res, next) {
   res.send('respond with a resource');
 });
 
-router.all('/*', function(req, res, next) {
+/* Final route  */
+router.all('*', function(req, res, next) {
   
   res.status(404).json({
     data: null,
