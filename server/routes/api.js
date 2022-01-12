@@ -1,7 +1,25 @@
 const express = require('express');
 const router = express.Router();
 
-const db = require('../db');
+const { db, err } = require('../db');
+
+router.all('/*', function(req, res, next) {
+
+  if (db && !err) {
+
+    next();
+
+  } else {
+
+    res.status(500).json({
+      data: null,
+      error: true,
+      message: 'Eroare a bazei de date!'
+    });
+
+  }
+
+});
 
 /* API requests */
 /**

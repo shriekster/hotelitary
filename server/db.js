@@ -7,7 +7,7 @@
  const fs = require('fs');
 
  let db;
- let error = null;
+ let err = null;
  let dbPath = path.join(__dirname, './data/db/hotelitary.db');
  let sqlPath = path.join(__dirname, './data/db/hotelitary.sql');
 
@@ -15,10 +15,18 @@
 
    if (!fs.existsSync(dbPath)) {
 
-     db = new Database(dbPath);
+    if (fs.existsSync(sqlPath)) {
 
-     const createDatabase = fs.readFileSync(sqlPath, 'utf8');
-     db.exec(createDatabase);
+        db = new Database(dbPath);
+
+        const createDatabase = fs.readFileSync(sqlPath, 'utf8');
+        db.exec(createDatabase);
+
+    } else {
+
+        err = new Error('Baza de date nu poate fi creată!')
+
+    }
 
    } else {
      // the database exists
@@ -27,12 +35,11 @@
 
  } catch (e) {
 
-   error = e;
-   //console.log(e);
+   err = e;
 
  } finally {
 
-   if (!error){
+   if (!err){
 
      db.pragma('journal_mode = WAL');
      db.pragma('synchronous = FULL');
@@ -47,4 +54,7 @@
    
  }
 
- module.exports = db;
+ module.exports = {
+     db,
+     err
+ };
