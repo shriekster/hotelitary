@@ -89,13 +89,13 @@ function App() {
       >
         <Tab icon={<SettingsIcon />}
           iconPosition='start' 
-          label={<Typography sx={{textTransform: 'none', fontSize: '1.2rem', paddingRight: '4px'}}>Setări</Typography>} {...a11yProps(0)} />
+          label={<Typography sx={{textTransform: 'none', fontSize: '1.2rem', paddingRight: 1}}>Setări</Typography>} {...a11yProps(0)} />
         <Tab icon={<MenuBookIcon />}
           iconPosition='start'  
-          label={<Typography sx={{textTransform: 'none', fontSize: '1.2rem', paddingRight: '4px'}}>Rezervări</Typography>} {...a11yProps(1)} />
+          label={<Typography sx={{textTransform: 'none', fontSize: '1.2rem', paddingRight: 1}}>Rezervări</Typography>} {...a11yProps(1)} />
         <Tab icon={<LibraryBooksIcon />}
           iconPosition='start'  
-          label={<Typography sx={{textTransform: 'none', fontSize: '1.2rem', paddingRight: '4px'}}>Raportări</Typography>} {...a11yProps(2)} />
+          label={<Typography sx={{textTransform: 'none', fontSize: '1.2rem', paddingRight: 1}}>Raportări</Typography>} {...a11yProps(2)} />
       </Tabs>
       <TabPanel value={value} index={0}>
         SETĂRI
