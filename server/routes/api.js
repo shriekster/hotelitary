@@ -30,6 +30,24 @@ router.get('/', function(req, res, next) {
   res.send('respond with a resource');
 });
 
+router.get('/hotels', function(req, res, next) {
+
+  res.status(404).json({
+    data: null,
+    error: true,
+    message: 'Informația solicitată nu există!'
+  });
+
+});
+
+router.get('/hotels/:id', function(req, res, next) {
+
+  res.json({
+    test: 'OK'
+  });
+
+});
+
 /* Final route  */
 router.all('*', function(req, res, next) {
   

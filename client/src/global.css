@@ -25,3 +25,20 @@ html {
     max-width: 100%;
     height: auto;
   }
+
+  .Settings-root {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .Settings-root .MuiImageListItem-root:hover {
+    background: rgba(53, 186, 246, 0.5);
+    cursor: pointer;
+  }
+
+  .Settings-attribute-cell {
+    font-weight: 700;
+  }
