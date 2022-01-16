@@ -225,6 +225,109 @@ router.put('/hotels/:id', function(req, res, next) {
 
 });
 
+/* GET room types */
+router.get('/hotels/:id/room-types', function(req, res, next) {
+
+  const hotelId = Number(req.params.id);
+
+  if (!isNaN(hotelId)) {
+
+    const selectRoomOptions = db.prepare(`
+      SELECT ID AS roomOptionId, Denumire AS roomOptionValue
+      FROM Module
+      ORDER BY ID ASC`);
+
+    const selectBedOptions = db.prepare(`
+      SELECT ID AS bedOptionId, Denumire AS bedOptionValue, Locuri AS bedOptionCapacity
+      FROM Paturi
+      ORDER BY ID ASC`);
+
+    const selectConfortOptions = db.prepare(`
+      SELECT ID AS confortOptionId, Denumire AS confortOptionValue
+      FROM Confort
+      ORDER BY ID ASC`);
+
+    const selectRoomTypes = db.prepare(`
+      SELECT TipuriModul.ID AS id, Module.Denumire AS roomCategory, TipuriModul.Paturi AS numberOfBeds, Paturi.Denumire AS bedType, Confort.Denumire AS confortType, TipuriModul.Denumire AS roomType
+      FROM TipuriModul
+      INNER JOIN Module ON TipuriModul.ModulID = Module.ID
+      INNER JOIN Paturi ON TipuriModul.PatID = Paturi.ID
+      INNER JOIN Confort ON TipuriModul.ConfortID = Confort.ID`);
+
+    let roomOptionsRows, roomOptions = [], bedOptionsRows, bedOptions = [], confortOptionsRows, confortOptions = [], roomTypes, err;
+
+    try {
+
+      roomOptionsRows = selectRoomOptions.all();
+      bedOptionsRows = selectBedOptions.all();
+      confortOptionsRows = selectConfortOptions.all();
+      roomTypes = selectRoomTypes.all();
+
+      for (let i = 0; i < roomOptionsRows.length; i++) {
+
+        roomOptions.push(roomOptionsRows[i].roomOptionValue);
+
+      }
+
+      for (let i = 0; i < bedOptionsRows.length; i++) {
+
+        bedOptions.push(bedOptionsRows[i].bedOptionValue);
+
+      }
+
+      for (let i = 0; i < confortOptionsRows.length; i++) {
+
+        confortOptions.push(confortOptionsRows[i].confortOptionValue);
+
+      }
+
+    } catch (error) {
+
+      err = error;
+
+    } finally {
+
+      if (!err) {
+
+
+
+        res.status(200).json({
+
+          data: {
+            roomOptions: roomOptions,
+            bedOptions: bedOptions,
+            confortOptions: confortOptions,
+            roomTypes: roomTypes,
+          },
+          error: false,
+          message: 'ok'
+
+        });
+
+      } else {
+
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Informația solicitată nu există!'
+        });
+
+      }
+
+    }
+
+  } else {
+
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Informația solicitată nu există!'
+    });
+
+  }
+
+});
+
 /* Final route: handler for all the incorrect / invalid requests */
 router.all('*', function(req, res, next) {
   

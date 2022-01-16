@@ -5,12 +5,13 @@ import ImageListItemBar from '@mui/material/ImageListItemBar';
 import SettingsIcon from '@mui/icons-material/Settings';
 
 import hotelInformation from './hotel-information.svg';
-import bedTypes from './bed-types.svg';
+//import bedTypes from './bed-types.svg'; // later
 import roomTypes from './room-types.svg';
 import rooms from './rooms.svg';
 import rates from './rates.svg';
 
 import HotelInformation from './Settings_/HotelInformation';
+import RoomTypes from './Settings_/RoomTypes';
 
 export default function Settings() {
 
@@ -23,8 +24,8 @@ export default function Settings() {
     switch (targetView) {
 
       case 'hotelInformation': { Component = HotelInformation; break; }
-      case 'bedTypes': {}
-      case 'roomTypes': {}
+      //case 'bedTypes': { Component = BedTypes; break; }
+      case 'roomTypes': { Component = RoomTypes; break; }
       case 'rooms': {}
       case 'rates': {}
       default: { Component = null; }
@@ -66,7 +67,7 @@ export default function Settings() {
             height: '96vh',
           }}
           variant='standard'
-          cols={3}
+          cols={2}
           gap={16}>
           {itemData.map((item) => (
             <ImageListItem key={item.img}
@@ -112,11 +113,13 @@ const itemData = [
     title: 'Informații hotel',
     view: 'hotelInformation',
   },
+  /*
   {
     img: bedTypes,
     title: 'Categorii paturi',
     view: 'bedTypes',
   },
+  */
   {
     img: roomTypes,
     title: 'Categorii spații',
