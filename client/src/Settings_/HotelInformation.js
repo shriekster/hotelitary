@@ -1,26 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import { DataGrid, GridRowsProp, GridColDef } from '@mui/x-data-grid';
 
-const initialRows = [
-  { id: 3, attribute: 'Județ', value: 'World' },
-  { id: 4, attribute: 'Localitate', value: 'is Awesome' },
-  { id: 5, attribute: 'Stradă', value: 'is Amazing' },
-  { id: 6, attribute: 'Număr', value: 'is Amazing' },
-  { id: 7, attribute: 'Cod poștal', value: 'is Amazing' },
-  { id: 8, attribute: 'Telefon', value: 'is Amazing' },
-  { id: 9, attribute: 'Fax', value: 'is Amazing' },
-  { id: 10, attribute: 'Email', value: 'is Amazing' },
-  { id: 11, attribute: 'Website', value: 'is Amazing' },
-];
-
-const columns = [
-  { field: 'attribute', headerName: '', flex: 1, sortable: false, filterable: false, align: 'center', cellClassName: 'Settings-attribute-cell'},
-  { field: 'value', headerName: '', flex: 1, sortable: false, filterable: false, align: 'center', editable: true, },
-];
-
 
 export default function HotelInformation() {
+
+  const columns = [
+    { field: 'attribute', headerName: '', flex: 1, sortable: false, filterable: false, align: 'center', cellClassName: 'Settings-attribute-cell'},
+    { field: 'value', headerName: '', flex: 1, sortable: false, filterable: false, align: 'center', editable: true, },
+  ];
+
+  const [rows, setRows] = useState(() => [
+    { id: 3, attribute: 'Județ', value: '-' },
+    { id: 4, attribute: 'Localitate', value: '-' },
+    { id: 5, attribute: 'Stradă', value: '-' },
+    { id: 6, attribute: 'Număr', value: '-' },
+    { id: 7, attribute: 'Cod poștal', value: '-' },
+    { id: 8, attribute: 'Telefon', value: '-' },
+    { id: 9, attribute: 'Fax', value: '-' },
+    { id: 10, attribute: 'Email', value: '-' },
+    { id: 11, attribute: 'Website', value: '-' },
+  ]);
+  
+
 
   useEffect(() => {
 
@@ -32,11 +34,31 @@ export default function HotelInformation() {
       };
   
       const response = await fetch('/api/hotels/1', requestOptions);
-      const json = await response.json();
-  
-      
+
+      if (response.ok) {
+
+        const json = await response.json();
+
+        const newRows = [
+          { id: 3, attribute: 'Județ', value: json.judet || '-' },
+          { id: 4, attribute: 'Localitate', value: json.localitate || '-' },
+          { id: 5, attribute: 'Stradă', value: json.strada || '-' },
+          { id: 6, attribute: 'Număr', value: json.numar || '-' },
+          { id: 7, attribute: 'Cod poștal', value: json.codPostal || '-' },
+          { id: 8, attribute: 'Telefon', value: json.telefon || '-' },
+          { id: 9, attribute: 'Fax', value: json.fax || '-' },
+          { id: 10, attribute: 'Email', value: json.email || '-' },
+          { id: 11, attribute: 'Website', value: json.website || '-' },
+        ];
+        console.log(newRows)
+
+        setRows((prevRows) => (newRows));
+
+      }
   
     }
+
+    fetchHotelInformation();
   
   }, []);
 
@@ -48,7 +70,7 @@ export default function HotelInformation() {
       <DataGrid sx={{
           width: '100%',
         }} 
-        rows={initialRows} 
+        rows={rows} 
         columns={columns} 
         disableColumnMenu 
         hideFooterPagination 
