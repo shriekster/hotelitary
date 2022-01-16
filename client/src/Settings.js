@@ -2,8 +2,6 @@ import { useState } from 'react';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
-import ListSubheader from '@mui/material/ListSubheader';
-import IconButton from '@mui/material/IconButton';
 import SettingsIcon from '@mui/icons-material/Settings';
 
 import hotelInformation from './hotel-information.svg';
@@ -33,7 +31,7 @@ export default function Settings() {
 
     }
 
-    return <Component />;
+    return <Component goBack={() => setView('overview')}/>;
 
   }
 

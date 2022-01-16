@@ -63,19 +63,23 @@ router.get('/hotels/:id', function(req, res, next) {
 
     } finally {
 
-      if (!err) {
+      if (!err && hotel) {
 
         res.status(200).json({
 
-          judet: hotel.judet,
-          localitate: hotel.localitate,
-          strada: hotel.strada,
-          numar: hotel.numar,
-          codPostal: hotel.codPostal,
-          telefon: hotel.telefon,
-          fax: hotel.fax,
-          email: hotel.email,
-          website: hotel.website,
+          data: {
+            judet: hotel.judet,
+            localitate: hotel.localitate,
+            strada: hotel.strada,
+            numar: hotel.numar,
+            codPostal: hotel.codPostal,
+            telefon: hotel.telefon,
+            fax: hotel.fax,
+            email: hotel.email,
+            website: hotel.website,
+          },
+          error: false,
+          message: 'ok'
 
         });
 
@@ -108,28 +112,80 @@ router.put('/hotels/:id', function(req, res, next) {
 
   const hotelId = Number(req.params.id);
   const attributeId = Number(req.body.id);
-  const value = req.body.value;
+  const value = req.body.value.toString() || '---';
 
   if (!isNaN(hotelId) && !isNaN(attributeId) && value) {
 
     let attribute;
 
-    switch (id) {
+    switch (attributeId) {
 
-      case 3:
-      case 4:
+      case 3: {
+        attribute = 'Judet';
+        break;
+      }
+
+      case 4: {
+        attribute = 'Localitate';
+        break;
+      }
+
+      case 5: {
+        attribute = 'Strada';
+        break;
+      }
+
+      case 6: {
+        attribute = 'Numar';
+        break;
+      }
+
+      case 7: {
+        attribute = 'CodPostal';
+        break;
+      }
+
+      case 8: {
+        attribute = 'Telefon';
+        break;
+      }
+
+      case 9: {
+        attribute = 'Fax';
+        break;
+      }
+
+      case 10: {
+        attribute = 'Email';
+        break;
+      }
+
+      case 11: {
+        attribute = 'Website';
+        break;
+      }
+
+      default: {
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare: actualizare nereușită!'
+        });
+        return;
+      }
 
     }
 
     const updateHotelInformation = db.prepare(`
       UPDATE Unitati
-      SET`);
+      SET ${attribute} = ?
+      WHERE ID = ${hotelId}`);
 
-    let hotel, err;
+    let info, err;
 
     try {
 
-      hotel = selectHotelInformation.get(hotelId);
+      info = updateHotelInformation.run(value);
 
     } catch (error) {
 
@@ -140,17 +196,9 @@ router.put('/hotels/:id', function(req, res, next) {
       if (!err) {
 
         res.status(200).json({
-
-          judet: hotel.judet,
-          localitate: hotel.localitate,
-          strada: hotel.strada,
-          numar: hotel.numar,
-          codPostal: hotel.codPostal,
-          telefon: hotel.telefon,
-          fax: hotel.fax,
-          email: hotel.email,
-          website: hotel.website,
-
+          data: null,
+          error: false,
+          message: 'Actualizat!'
         });
 
       } else {
@@ -158,7 +206,7 @@ router.put('/hotels/:id', function(req, res, next) {
         res.status(404).json({
           data: null,
           error: true,
-          message: 'Informația solicitată nu există!'
+          message: 'Eroare: actualizare nereușită!'
         });
 
       }

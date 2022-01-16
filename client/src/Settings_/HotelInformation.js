@@ -3,9 +3,13 @@ import { useState, useEffect, useRef } from 'react';
 import { DataGrid, GridRowsProp, GridColDef } from '@mui/x-data-grid';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import Tooltip from '@mui/material/Tooltip';
+import Typography  from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 
 
-export default function HotelInformation() {
+export default function HotelInformation(props) {
 
   const columns = [
     { field: 'attribute', headerName: '', flex: 1, sortable: false, filterable: false, align: 'center', cellClassName: 'Settings-attribute-cell'},
@@ -13,15 +17,15 @@ export default function HotelInformation() {
   ];
 
   const [rows, setRows] = useState(() => [
-    { id: 3, attribute: 'Județ', value: '-' },
-    { id: 4, attribute: 'Localitate', value: '-' },
-    { id: 5, attribute: 'Stradă', value: '-' },
-    { id: 6, attribute: 'Număr', value: '-' },
-    { id: 7, attribute: 'Cod poștal', value: '-' },
-    { id: 8, attribute: 'Telefon', value: '-' },
-    { id: 9, attribute: 'Fax', value: '-' },
-    { id: 10, attribute: 'Email', value: '-' },
-    { id: 11, attribute: 'Website', value: '-' },
+    { id: 3, attribute: 'Județ', value: '---' },
+    { id: 4, attribute: 'Localitate', value: '---' },
+    { id: 5, attribute: 'Stradă', value: '---' },
+    { id: 6, attribute: 'Număr', value: '---' },
+    { id: 7, attribute: 'Cod poștal', value: '---' },
+    { id: 8, attribute: 'Telefon', value: '---' },
+    { id: 9, attribute: 'Fax', value: '---' },
+    { id: 10, attribute: 'Email', value: '---' },
+    { id: 11, attribute: 'Website', value: '---' },
   ]);
 
 
@@ -39,7 +43,7 @@ export default function HotelInformation() {
       },
       body: JSON.stringify({
           id: params.id,
-          value: params.value
+          value: params.value || '---'
       }),
     };
 
@@ -49,7 +53,7 @@ export default function HotelInformation() {
     if (response.ok) {
 
       setSnackbar({ children: 'Actualizat!', severity: 'success' });
-      setRows((prevRows) => prevRows.map((row) => (row.id === params.id ? { ...row, ...response } : row)),
+      setRows((prevRows) => prevRows.map((row) => (row.id === params.id ? { ...row, value: params.value || '---' } : row)),
     );
 
     } else {
@@ -72,24 +76,37 @@ export default function HotelInformation() {
   
       const response = await fetch('/api/hotels/1', requestOptions);
 
+      const json = await response.json();
+
       if (response.ok) {
 
-        const json = await response.json();
+        if (!json.error) {
 
-        const newRows = [
-          { id: 3, attribute: 'Județ', value: json.judet || '-' },
-          { id: 4, attribute: 'Localitate', value: json.localitate || '-' },
-          { id: 5, attribute: 'Stradă', value: json.strada || '-' },
-          { id: 6, attribute: 'Număr', value: json.numar || '-' },
-          { id: 7, attribute: 'Cod poștal', value: json.codPostal || '-' },
-          { id: 8, attribute: 'Telefon', value: json.telefon || '-' },
-          { id: 9, attribute: 'Fax', value: json.fax || '-' },
-          { id: 10, attribute: 'Email', value: json.email || '-' },
-          { id: 11, attribute: 'Website', value: json.website || '-' },
-        ];
-        console.log(newRows)
+          const hotel = json.data;
 
-        setRows((prevRows) => (newRows));
+          const newRows = [
+            { id: 3, attribute: 'Județ', value: hotel.judet || '---' },
+            { id: 4, attribute: 'Localitate', value: hotel.localitate || '---' },
+            { id: 5, attribute: 'Stradă', value: hotel.strada || '---' },
+            { id: 6, attribute: 'Număr', value: hotel.numar || '---' },
+            { id: 7, attribute: 'Cod poștal', value: hotel.codPostal || '---' },
+            { id: 8, attribute: 'Telefon', value: hotel.telefon || '---' },
+            { id: 9, attribute: 'Fax', value: hotel.fax || '---' },
+            { id: 10, attribute: 'Email', value: hotel.email || '---' },
+            { id: 11, attribute: 'Website', value: hotel.website || '---' },
+          ];
+  
+          setRows((prevRows) => (newRows));
+
+        } else {
+
+          setSnackbar({ children: json.message, severity: 'error' });
+
+        }
+
+      } else {
+
+        setSnackbar({ children: json.message, severity: 'error' });
 
       }
   
@@ -101,9 +118,28 @@ export default function HotelInformation() {
 
   return (
     <div style={{
-      height: '96vh',
+      height: 'calc(96vh - 56px)',
       width: '96%',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
     }}>
+      <div style={{
+        height: '56px',
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'start',
+      }}>
+        <Tooltip title={<Typography>Mergi la meniul anterior</Typography>}
+          arrow={true}
+          placement='right'>
+          <IconButton size='small' color='primary' onClick={props.goBack}>
+            <NavigateBeforeIcon fontSize='large'/>
+          </IconButton>
+        </Tooltip>
+      </div>
       <DataGrid sx={{
           width: '100%',
         }} 
@@ -114,7 +150,13 @@ export default function HotelInformation() {
         hideFooterPagination 
         hideFooterSelectedRowCount />
       {!!snackbar && (
-        <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={6000} position>
+        <Snackbar open 
+          onClose={handleCloseSnackbar} 
+          autoHideDuration={3000}
+          anchorOrigin={{
+            horizontal: 'center',
+            vertical: 'top',
+          }}>
           <Alert {...snackbar} onClose={handleCloseSnackbar} />
         </Snackbar>
       )}
