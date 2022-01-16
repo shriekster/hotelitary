@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 
 import { DataGrid, GridRowsProp, GridColDef } from '@mui/x-data-grid';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 
 
 export default function HotelInformation() {
@@ -21,8 +23,43 @@ export default function HotelInformation() {
     { id: 10, attribute: 'Email', value: '-' },
     { id: 11, attribute: 'Website', value: '-' },
   ]);
-  
 
+
+  const [snackbar, setSnackbar] = useState(null);
+
+  const handleCloseSnackbar = () => setSnackbar(null);
+  
+  const handleCellEditCommit = async (params) => {
+
+    const requestOptions = {
+      method: 'PUT',
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+          id: params.id,
+          value: params.value
+      }),
+    };
+
+    const response = await fetch('/api/hotels/1', requestOptions);
+    const json = await response.json();
+
+    if (response.ok) {
+
+      setSnackbar({ children: 'Actualizat!', severity: 'success' });
+      setRows((prevRows) => prevRows.map((row) => (row.id === params.id ? { ...row, ...response } : row)),
+    );
+
+    } else {
+
+      setSnackbar({ children: json.message, severity: 'error' });
+      setRows((prevRows) => [...prevRows]);
+
+    }
+
+  }
 
   useEffect(() => {
 
@@ -71,10 +108,16 @@ export default function HotelInformation() {
           width: '100%',
         }} 
         rows={rows} 
-        columns={columns} 
+        columns={columns}
+        onCellEditCommit={handleCellEditCommit}
         disableColumnMenu 
         hideFooterPagination 
         hideFooterSelectedRowCount />
+      {!!snackbar && (
+        <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={6000} position>
+          <Alert {...snackbar} onClose={handleCloseSnackbar} />
+        </Snackbar>
+      )}
     </div>
   );
 }

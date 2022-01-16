@@ -26,10 +26,6 @@ router.all('/*', function(req, res, next) {
 /**
  * 
  */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
-
 router.get('/hotels', function(req, res, next) {
 
   res.status(404).json({
@@ -40,11 +36,12 @@ router.get('/hotels', function(req, res, next) {
 
 });
 
+/* GET hotel information */
 router.get('/hotels/:id', function(req, res, next) {
 
-  const targetId = Number(req.params.id);
+  const hotelId = Number(req.params.id);
 
-  if (!isNaN(targetId)) {
+  if (!isNaN(hotelId)) {
 
     const selectHotelInformation = db.prepare(`
       SELECT Judet AS judet, Localitate AS localitate,
@@ -58,7 +55,7 @@ router.get('/hotels/:id', function(req, res, next) {
 
     try {
 
-      hotel = selectHotelInformation.get(targetId);
+      hotel = selectHotelInformation.get(hotelId);
 
     } catch (error) {
 
@@ -106,7 +103,81 @@ router.get('/hotels/:id', function(req, res, next) {
 
 });
 
-/* Final route  */
+/* PUT (UPDATE) hotel information */
+router.put('/hotels/:id', function(req, res, next) {
+
+  const hotelId = Number(req.params.id);
+  const attributeId = Number(req.body.id);
+  const value = req.body.value;
+
+  if (!isNaN(hotelId) && !isNaN(attributeId) && value) {
+
+    let attribute;
+
+    switch (id) {
+
+      case 3:
+      case 4:
+
+    }
+
+    const updateHotelInformation = db.prepare(`
+      UPDATE Unitati
+      SET`);
+
+    let hotel, err;
+
+    try {
+
+      hotel = selectHotelInformation.get(hotelId);
+
+    } catch (error) {
+
+      err = error;
+
+    } finally {
+
+      if (!err) {
+
+        res.status(200).json({
+
+          judet: hotel.judet,
+          localitate: hotel.localitate,
+          strada: hotel.strada,
+          numar: hotel.numar,
+          codPostal: hotel.codPostal,
+          telefon: hotel.telefon,
+          fax: hotel.fax,
+          email: hotel.email,
+          website: hotel.website,
+
+        });
+
+      } else {
+
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Informația solicitată nu există!'
+        });
+
+      }
+
+    }
+
+  } else {
+
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Eroare: actualizare nereușită!'
+    });
+
+  }
+
+});
+
+/* Final route: handler for all the incorrect / invalid requests */
 router.all('*', function(req, res, next) {
   
   res.status(404).json({
