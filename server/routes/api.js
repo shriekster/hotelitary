@@ -23,9 +23,7 @@ router.all('/*', function(req, res, next) {
 });
 
 /* API requests */
-/**
- * 
- */
+/* TODO: GET hotels (future work) */
 router.get('/hotels', function(req, res, next) {
 
   res.status(404).json({
@@ -225,6 +223,117 @@ router.put('/hotels/:id', function(req, res, next) {
 
 });
 
+/* POST (CREATE) room types */
+router.post('/hotels/:id/room-types', function(req, res, next) {
+
+  const hotelId = Number(req.params.id);
+
+  let { id, roomCategory, numberOfBeds, bedType, confortType, roomType } = req.body;
+
+  const isValid = !isNaN(Number(id)) && !!Number(id) && !!roomCategory && !!numberOfBeds && !!bedType && !!confortType && !!roomType;
+
+  if (!isNaN(hotelId) && isValid) {
+
+    const selectRoomOptions = db.prepare(`
+    SELECT ID AS roomOptionId, Denumire AS roomOptionValue
+    FROM Module
+    ORDER BY ID ASC`);
+
+    const selectBedOptions = db.prepare(`
+      SELECT ID AS bedOptionId, Denumire AS bedOptionValue, Locuri AS bedOptionCapacity
+      FROM Paturi
+      ORDER BY ID ASC`);
+
+    const selectConfortOptions = db.prepare(`
+      SELECT ID AS confortOptionId, Denumire AS confortOptionValue
+      FROM Confort
+      ORDER BY ID ASC`);
+
+    const insertRoomType = db.prepare(`
+      INSERT INTO TipuriModul(ID, ModulID, Paturi, PatID, ConfortID, Denumire)
+      VALUES(?, ?, ?, ?, ?, ?)`);
+
+    let info, roomOptionsRows, roomOptions = {}, bedOptionsRows, bedOptions = {}, confortOptionsRows, confortOptions = {}, err;
+
+    try {
+
+      roomOptionsRows = selectRoomOptions.all();
+
+      for (let i = 0; i < roomOptionsRows.length; i++) {
+
+        roomOptions[`${roomOptionsRows[i].roomOptionValue}`] =  roomOptionsRows[i].roomOptionId;
+
+      }
+
+      roomCategory = Number(roomOptions[roomCategory]);
+
+      bedOptionsRows = selectBedOptions.all();
+
+      for (let i = 0; i < bedOptionsRows.length; i++) {
+
+        bedOptions[`${bedOptionsRows[i].bedOptionValue}`] = bedOptionsRows[i].bedOptionId;
+
+      }
+
+      bedType = Number(bedOptions[bedType]);
+
+      confortOptionsRows = selectConfortOptions.all();
+
+      for (let i = 0; i < confortOptionsRows.length; i++) {
+
+        confortOptions[`${confortOptionsRows[i].confortOptionValue}`] = confortOptionsRows[i].confortOptionId;
+
+      }
+
+      confortType = Number(confortOptions[confortType]);
+
+      info = insertRoomType.run(
+        Number(id),
+        roomCategory,
+        Number(numberOfBeds),
+        bedType,
+        confortType,
+        roomType.toString()
+      );
+
+    } catch (error) {
+
+      err = error;
+
+    } finally {
+
+      if (!err) {
+
+        res.status(200).json({
+          data: null,
+          error: false,
+          message: 'Adăugat!'
+        });
+
+      } else {
+
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare: adăugare nereușită!'
+        });
+
+      }
+
+    }
+
+  } else {
+
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Eroare: adăugare nereușită!'
+    });
+
+  }
+
+});
+
 /* GET room types */
 router.get('/hotels/:id/room-types', function(req, res, next) {
 
@@ -322,6 +431,242 @@ router.get('/hotels/:id/room-types', function(req, res, next) {
       data: null,
       error: true,
       message: 'Informația solicitată nu există!'
+    });
+
+  }
+
+});
+
+/* PUT (UPDATE) room types */
+router.put('/hotels/:id/room-types/:roomTypeId', function(req, res, next) {
+
+  const hotelId = Number(req.params.id);
+  const roomTypeId = Number(req.params.roomTypeId);
+  const field = req.body.field.toString();
+  let value = req.body.value.toString();
+
+  if (!isNaN(hotelId) && !isNaN(roomTypeId) && !!field && !!value) {
+
+    let attribute;
+    
+    switch (field) {
+
+      case 'roomCategory': {
+        attribute = 'ModulID';
+        break;
+      }
+
+      case 'numberOfBeds': {
+        attribute = 'Paturi';
+        break;
+      }
+
+      case 'bedType': {
+        attribute = 'PatID';
+        break;
+      }
+
+      case 'confortType': {
+        attribute = 'ConfortID';
+        break;
+      }
+
+      case 'roomType': {
+        attribute = 'Denumire';
+        break;
+      }
+
+      default: {
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare: actualizare nereușită!'
+        });
+        return;
+      }
+
+    }
+
+    const selectRoomOptions = db.prepare(`
+    SELECT ID AS roomOptionId, Denumire AS roomOptionValue
+    FROM Module
+    ORDER BY ID ASC`);
+
+    const selectBedOptions = db.prepare(`
+      SELECT ID AS bedOptionId, Denumire AS bedOptionValue, Locuri AS bedOptionCapacity
+      FROM Paturi
+      ORDER BY ID ASC`);
+
+    const selectConfortOptions = db.prepare(`
+      SELECT ID AS confortOptionId, Denumire AS confortOptionValue
+      FROM Confort
+      ORDER BY ID ASC`);
+
+    const updateRoomTypes = db.prepare(`
+      UPDATE TipuriModul
+      SET ${attribute} = ?
+      WHERE ID = ${roomTypeId}`);
+
+    let info, roomOptionsRows, roomOptions = {}, bedOptionsRows, bedOptions = {}, confortOptionsRows, confortOptions = {}, err;
+
+    try {
+
+      switch (field) {
+
+        case 'roomCategory': {
+
+          roomOptionsRows = selectRoomOptions.all();
+
+          for (let i = 0; i < roomOptionsRows.length; i++) {
+
+            roomOptions[`${roomOptionsRows[i].roomOptionValue}`] =  roomOptionsRows[i].roomOptionId;
+    
+          }
+
+          value = Number(roomOptions[value]);
+
+          break;
+
+        }
+
+        case 'bedType': {
+
+          bedOptionsRows = selectBedOptions.all();
+
+          for (let i = 0; i < bedOptionsRows.length; i++) {
+
+            bedOptions[`${bedOptionsRows[i].bedOptionValue}`] = bedOptionsRows[i].bedOptionId;
+    
+          }
+
+          value = Number(bedOptions[value]);
+
+          break;
+
+        }
+        
+        case 'confortType': {
+
+          confortOptionsRows = selectConfortOptions.all();
+
+          for (let i = 0; i < confortOptionsRows.length; i++) {
+
+            confortOptions[`${confortOptionsRows[i].confortOptionValue}`] = confortOptionsRows[i].confortOptionId;
+    
+          }
+
+          value = Number(confortOptions[value]);
+
+          break;
+
+        }
+
+        default: { break; }
+      }
+      
+      info = updateRoomTypes.run(value);
+
+    } catch (error) {
+
+      err = error;
+
+    } finally {
+
+      if (!err) {
+
+        res.status(200).json({
+          data: null,
+          error: false,
+          message: 'Actualizat!'
+        });
+
+      } else {
+
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare: actualizare nereușită!'
+        });
+
+      }
+
+    }
+
+  } else {
+
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Eroare: actualizare nereușită!'
+    });
+
+  }
+
+});
+
+/* DELETE room types */
+router.delete('/hotels/:id/room-types', function(req, res, next){
+
+  const hotelId = Number(req.params.id);
+  const { ids } = req.body;
+  const isValid = ids.every(id => id > 0);
+
+  if (!isNaN(hotelId) && !!ids && ids.length > 0 && isValid) {
+
+    const deleteRoomType = db.prepare(`
+      DELETE FROM TipuriModul
+      WHERE ID = ?`);
+    
+    const deleteRoomTypes = db.transaction( (ids) => {
+
+      for (const id of ids) {
+
+        deleteRoomType.run(
+            Number(id)
+        );
+
+      }
+
+    });
+
+    let err;
+
+    try {
+
+      deleteRoomTypes(ids);
+
+    } catch (error) {
+
+      err = error;
+
+    } finally {
+
+      if (!err) {
+
+        res.status(200).json({
+          data: null,
+          error: false,
+          message: 'Șters(e)!'
+        });
+
+      } else {
+
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare: ștergere nereușită!'
+        });
+
+      }
+
+    }
+
+  } else {
+
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Eroare: ștergere nereușită!'
     });
 
   }
