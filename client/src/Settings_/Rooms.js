@@ -1,3 +1,6 @@
+// STATUS camera: -1: curatenie, 0 - libera,  1 - rezervata, 2 - ocupata
+// STATUS rezervare: -1: in asteptare, 0 - activa, 1 - incheiata 
+
 import { useState, useEffect, useRef } from 'react';
 
 import { DataGrid, GridRowsProp, GridColDef } from '@mui/x-data-grid';
@@ -19,21 +22,28 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 export default function Rooms(props) {
 
+  const [floorOptions, setFloorOptions] = useState(() => []);
   const [roomTypeOptions, setRoomTypeOptions] = useState(() => []);
-  const [bedTypeOptions, setBedTypeOptions] = useState(() => []);
-  const [confortTypeOptions, setConfortTypeOptions] = useState(() => []);
 
   const [snackbar, setSnackbar] = useState(null);
 
   const columns = [
     //{ field: 'attribute', headerName: '', flex: 1, sortable: false, filterable: false, align: 'center', cellClassName: 'Settings-attribute-cell'},
     { field: 'id', headerName: 'ID', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', },
-    { field: 'roomCategory', type: 'singleSelect', valueOptions: roomTypeOptions, headerName: 'Tip modul', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
-    { field: 'numberOfBeds', type: 'singleSelect', valueOptions: [1, 2, 3, 4, 5], headerName: 'Paturi', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true,},
-    { field: 'bedType', type: 'singleSelect', valueOptions: bedTypeOptions, headerName: 'Tip pat', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
-    { field: 'confortType', type: 'singleSelect', valueOptions: confortTypeOptions, headerName: 'Confort', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true, },
-    { field: 'roomType', headerName: 'Denumire spațiu', flex: 2, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
+    { field: 'floor', type: 'singleSelect', valueOptions: floorOptions, headerName: 'Etaj', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
+    { field: 'number', headerName: 'Număr', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true,},
+    { field: 'roomType', type: 'singleSelect', valueOptions: roomTypeOptions, headerName: 'Denumire spațiu', flex: 2, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
+    { field: 'status', headerName: 'Status', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: false, },
   ];
+
+  const roomStatuses = {
+
+    '-1': 'curățenie',
+    '0': 'liber',
+    '1': 'rezervat',
+    '2': 'ocupat'
+      
+  }
 
   const [rows, setRows] = useState(() => []);
 
@@ -45,11 +55,10 @@ export default function Rooms(props) {
 
   const rowToAdd = useRef({
     id: '',
-    roomCategory: '',
-    numberOfBeds: '',
-    bedType: '',
-    confortType: '',
+    floor: '',
+    number: '',
     roomType: '',
+    status: '',
   });
 
   const handleCloseSnackbar = () => {
@@ -63,11 +72,10 @@ export default function Rooms(props) {
       if (rowToAdd.current) {
 
         rowToAdd.current.id = '';
-        rowToAdd.current.roomCategory = '';
-        rowToAdd.current.numberOfBeds = '';
-        rowToAdd.current.bedType = '';
-        rowToAdd.current.confortType = '';
+        rowToAdd.current.floor = '';
+        rowToAdd.current.number = '';
         rowToAdd.current.roomType = '';
+        rowToAdd.current.status = '';
   
       }
 
@@ -95,14 +103,13 @@ export default function Rooms(props) {
       }),
     };
 
-    const response = await fetch(`/api/hotels/1/room-types/${params.id}`, requestOptions);
+    const response = await fetch(`/api/hotels/1/rooms/${params.id}`, requestOptions);
     const json = await response.json();
 
     if (response.ok) {
 
       setSnackbar({ children: 'Actualizat!', severity: 'success' });
-      setRows((prevRows) => prevRows.map((row) => (row.id === params.id ? { ...row, [`${params.field}`]: params.value || '---' } : row)),
-    );
+      setRows((prevRows) => prevRows.map((row) => (row.id === params.id ? { ...row, [`${params.field}`]: params.value || '---' } : row)));
 
     } else {
 
@@ -120,6 +127,7 @@ export default function Rooms(props) {
     if (rowToAdd.current) {
 
       rowToAdd.current.id = newId;
+      rowToAdd.current.status = 'liber';
 
     }
 
@@ -133,6 +141,10 @@ export default function Rooms(props) {
 
       rowToAdd.current[`${params.field}`] = params.value;
 
+      if (params.field === 'number' && params.value.includes('-')) {
+          // ADD ROOM INTERVAL - server side
+      }
+
     }
 
   }
@@ -141,9 +153,9 @@ export default function Rooms(props) {
 
     if (rowToAdd.current) {
 
-      const { id, roomCategory, numberOfBeds, bedType, confortType, roomType } = rowToAdd.current;
+      const { id, floor, number, roomType, status } = rowToAdd.current;
 
-      if (!!id && !!roomCategory && !!numberOfBeds && !!bedType && !!confortType && !!roomType) {
+      if (!!id && !!floor && !!number && !!roomType && !!status) {
 
         setLoading(true);
 
@@ -156,7 +168,7 @@ export default function Rooms(props) {
           body: JSON.stringify(rowToAdd.current),
         };
 
-        const response = await fetch(`/api/hotels/1/room-types`, requestOptions);
+        const response = await fetch(`/api/hotels/1/rooms`, requestOptions);
         const json = await response.json();
 
         setLoading(false);
@@ -177,11 +189,10 @@ export default function Rooms(props) {
         }
 
         rowToAdd.current.id = '';
-        rowToAdd.current.roomCategory = '';
-        rowToAdd.current.numberOfBeds = '';
-        rowToAdd.current.bedType = '';
-        rowToAdd.current.confortType = '';
+        rowToAdd.current.floor = '';
+        rowToAdd.current.number = '';
         rowToAdd.current.roomType = '';
+        rowToAdd.current.status = '';
 
       } else {
 
@@ -210,7 +221,7 @@ export default function Rooms(props) {
         }),
       };
 
-      const response = await fetch('/api/hotels/1/room-types', requestOptions);
+      const response = await fetch('/api/hotels/1/rooms', requestOptions);
       const json = await response.json();
 
       setLoading(false);
@@ -236,12 +247,11 @@ export default function Rooms(props) {
 
     if (rowToAdd.current) {
 
-      rowToAdd.current.id = '';
-      rowToAdd.current.roomCategory = '';
-      rowToAdd.current.numberOfBeds = '';
-      rowToAdd.current.bedType = '';
-      rowToAdd.current.confortType = '';
-      rowToAdd.current.roomType = '';
+        rowToAdd.current.id = '';
+        rowToAdd.current.floor = '';
+        rowToAdd.current.number = '';
+        rowToAdd.current.roomType = '';
+        rowToAdd.current.status = '';
 
     }
 
@@ -257,14 +267,14 @@ export default function Rooms(props) {
 
   useEffect(() => {
 
-    async function fetchRoomTypes() {
+    async function fetchRooms() {
   
       const requestOptions = {
         method: 'GET',
         mode: 'cors',
       };
   
-      const response = await fetch('/api/hotels/1/room-types', requestOptions);
+      const response = await fetch('/api/hotels/1/rooms', requestOptions);
 
       const json = await response.json();
 
@@ -276,14 +286,12 @@ export default function Rooms(props) {
 
           const data = json.data;
 
-          const newRoomTypeOptions = [...data.roomOptions];
-          const newBedTypeOptions = [...data.bedOptions]
-          const newConfortTypeOptions = [...data.confortOptions];
-          const newRows = [...data.roomTypes];
+          const newFloorOptions = [...data.floorOptions];
+          const newRoomTypeOptions = [...data.roomTypeOptions]
+          const newRows = [...data.rooms];
 
+          setFloorOptions(newFloorOptions);
           setRoomTypeOptions(newRoomTypeOptions);
-          setBedTypeOptions(newBedTypeOptions);
-          setConfortTypeOptions(newConfortTypeOptions);
   
           setRows((prevRows) => (newRows));
 
@@ -301,7 +309,7 @@ export default function Rooms(props) {
   
     }
 
-    fetchRoomTypes();
+    fetchRooms();
   
   }, []);
 
@@ -369,7 +377,7 @@ export default function Rooms(props) {
           alignItems: 'center',
           justifyContent: 'space-between',
           }}>
-            <Tooltip title={<Typography>{selectionModel.length === 0 ? `Șterge` : `Șterge ${selectionModel.length === 1 ? 'categoria' : 'categoriile'} de spațiu`}</Typography>}
+            <Tooltip title={<Typography>{selectionModel.length === 0 ? `Șterge` : `Șterge ${selectionModel.length === 1 ? 'spațiu' : 'spații'} de cazare`}</Typography>}
               arrow={true}
               placement='right'>
               <span>
@@ -381,7 +389,7 @@ export default function Rooms(props) {
               </IconButton>
               </span>
             </Tooltip>
-            <Tooltip title={<Typography>Adaugă o categorie de spațiu</Typography>}
+            <Tooltip title={<Typography>Adaugă spații de cazare</Typography>}
               arrow={true}
               placement='left'>
               <Fab color='primary' 
@@ -396,7 +404,7 @@ export default function Rooms(props) {
           onClose={handleCloseDialog} 
           open={openDialog}>
           <DialogTitle sx={{textAlign: 'center'}}>
-            Adaugă o categorie de spațiu
+            Adaugă spații de cazare
           </DialogTitle>
           <DialogContent sx={{
             height: '50vh',

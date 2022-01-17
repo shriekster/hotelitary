@@ -23,7 +23,7 @@ router.all('/*', function(req, res, next) {
 });
 
 /* API requests */
-/* TODO: GET hotels (future work) */
+/* TODO: GET (READ) hotels (future work) */
 router.get('/hotels', function(req, res, next) {
 
   res.status(404).json({
@@ -34,7 +34,7 @@ router.get('/hotels', function(req, res, next) {
 
 });
 
-/* GET hotel information */
+/* GET (READ) hotel information */
 router.get('/hotels/:id', function(req, res, next) {
 
   const hotelId = Number(req.params.id);
@@ -334,7 +334,7 @@ router.post('/hotels/:id/room-types', function(req, res, next) {
 
 });
 
-/* GET room types */
+/* GET (READ) room types */
 router.get('/hotels/:id/room-types', function(req, res, next) {
 
   const hotelId = Number(req.params.id);
@@ -634,6 +634,419 @@ router.delete('/hotels/:id/room-types', function(req, res, next){
     try {
 
       deleteRoomTypes(ids);
+
+    } catch (error) {
+
+      err = error;
+
+    } finally {
+
+      if (!err) {
+
+        res.status(200).json({
+          data: null,
+          error: false,
+          message: 'Șters(e)!'
+        });
+
+      } else {
+
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare: ștergere nereușită!'
+        });
+
+      }
+
+    }
+
+  } else {
+
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Eroare: ștergere nereușită!'
+    });
+
+  }
+
+});
+
+/* GET (READ) rooms */
+router.get('/hotels/:id/rooms', function(req, res, next) {
+
+  const roomStatuses = {
+
+    '-1': 'curățenie',
+    '0': 'liber',
+    '1': 'rezervat',
+    '2': 'ocupat'
+      
+  }
+
+  const hotelId = Number(req.params.id);
+
+  if (!isNaN(hotelId)) {
+
+    const selectFloorOptions = db.prepare(`
+    SELECT Denumire AS floorOptionValue
+    FROM Etaje
+    ORDER BY ID ASC`);
+
+    const selectRoomTypeOptions = db.prepare(`
+      SELECT Denumire AS roomTypeOptionValue
+      FROM TipuriModul
+      ORDER BY ID ASC`);
+
+    const selectRooms = db.prepare(`
+      SELECT Spatii.ID AS id, Etaje.Denumire AS floor, Spatii.Numar AS number, TipuriModul.Denumire AS roomType, Status AS status
+      FROM Spatii
+      INNER JOIN Etaje ON Spatii.EtajID = Etaje.ID
+      INNER JOIN TipuriModul ON Spatii.TipModulID = TipuriModul.ID`);
+
+    let floorOptionsRows, floorOptions = [], roomTypeOptionsRows, roomTypeOptions = [], rooms, err;
+
+    try {
+
+      floorOptionsRows = selectFloorOptions.all();
+      roomTypeOptionsRows = selectRoomTypeOptions.all();
+      rooms = selectRooms.all();
+
+      for (let i = 0; i < floorOptionsRows.length; i++) {
+
+        floorOptions.push(floorOptionsRows[i].floorOptionValue);
+
+      }
+
+      for (let i = 0; i < roomTypeOptionsRows.length; i++) {
+
+        roomTypeOptions.push(roomTypeOptionsRows[i].roomTypeOptionValue);
+
+      }
+
+      for (let i = 0; i < rooms.length; i++) {
+
+        rooms[i].status = roomStatuses[`${rooms[i].status}`];
+
+      }
+
+    } catch (error) {
+
+      err = error;console.log(err)
+
+    } finally {
+
+      if (!err) {
+
+        res.status(200).json({
+
+          data: {
+            floorOptions: floorOptions,
+            roomTypeOptions: roomTypeOptions,
+            rooms: rooms,
+          },
+          error: false,
+          message: 'ok'
+
+        });
+
+      } else {
+
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Informația solicitată nu există!'
+        });
+
+      }
+
+    }
+
+  } else {
+
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Informația solicitată nu există!'
+    });
+
+  }
+
+});
+
+/* PUT (UPDATE) rooms */
+router.put('/hotels/:id/rooms/:roomId', function(req, res, next) {
+
+  const hotelId = Number(req.params.id);
+  const roomId = Number(req.params.roomId);
+  const field = req.body.field.toString();
+  let value = req.body.value.toString();
+
+  if (!isNaN(hotelId) && !isNaN(roomId) && !!field && !!value) {
+
+    let attribute;
+    
+    switch (field) {
+
+      case 'floor': {
+        attribute = 'EtajID';
+        break;
+      }
+
+      case 'number': {
+        attribute = 'Numar';
+        break;
+      }
+
+      case 'roomType': {
+        attribute = 'TipModulID';
+        break;
+      }
+
+      default: {
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare: actualizare nereușită!'
+        });
+        return;
+      }
+
+    }
+
+    const selectFloorOptions = db.prepare(`
+      SELECT ID AS floorOptionId, Denumire AS floorOptionValue
+      FROM Etaje
+      ORDER BY ID ASC`);
+
+    const selectRoomTypeOptions = db.prepare(`
+    SELECT ID AS roomTypeOptionId, Denumire AS roomTypeOptionValue
+    FROM Module
+    ORDER BY ID ASC`);
+
+    const updateRooms = db.prepare(`
+      UPDATE Spatii
+      SET ${attribute} = ?
+      WHERE ID = ${roomId}`);
+
+    let info, floorOptionsRows, floorOptions = {}, roomTypeOptionsRows, roomTypeOptions = {}, err;
+
+    try {
+
+      switch (field) {
+
+        case 'floor': {
+
+          floorOptionsRows = selectFloorOptions.all();
+
+          for (let i = 0; i < floorOptionsRows.length; i++) {
+
+            floorOptions[`${floorOptionsRows[i].floorOptionValue}`] =  floorOptionsRows[i].floorOptionId;
+    
+          }
+
+          value = Number(floorOptions[value]);
+
+          break;
+
+        }
+
+        case 'roomType': {
+
+          roomTypeOptionsRows = selectRoomTypeOptions.all();
+
+          for (let i = 0; i < roomTypeOptionsRows.length; i++) {
+
+            roomTypeOptions[`${roomTypeOptionsRows[i].roomTypeOptionValue}`] =  roomTypeOptionsRows[i].roomTypeOptionId;
+    
+          }
+
+          value = Number(roomTypeOptions[value]);
+
+          break;
+
+        }
+
+        default: { break; }
+      }
+      
+      info = updateRooms.run(value);
+
+    } catch (error) {
+
+      err = error;
+
+    } finally {
+
+      if (!err) {
+
+        res.status(200).json({
+          data: null,
+          error: false,
+          message: 'Actualizat!'
+        });
+
+      } else {
+
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare: actualizare nereușită!'
+        });
+
+      }
+
+    }
+
+  } else {
+
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Eroare: actualizare nereușită!'
+    });
+
+  }
+
+});
+
+/* POST (CREATE) rooms */
+router.post('/hotels/:id/rooms', function(req, res, next) {
+
+  const roomStatuses = {
+
+    'curățenie': '-1',
+    'liber': '0',
+    'rezervat': '1', 
+    'ocupat': '2'
+      
+  };
+
+  const hotelId = Number(req.params.id);
+
+  let { id, floor, number, roomType, status } = req.body;
+
+  const isValid = !isNaN(Number(id)) && !!Number(id) && !!floor && !!number && !!roomType && !!status;
+
+  if (!isNaN(hotelId) && isValid) {
+
+    const selectFloorOptions = db.prepare(`
+      SELECT ID AS floorOptionId, Denumire AS floorOptionValue
+      FROM Etaje
+      ORDER BY ID ASC`);
+
+    const selectRoomTypeOptions = db.prepare(`
+    SELECT ID AS roomTypeOptionId, Denumire AS roomTypeOptionValue
+    FROM TipuriModul
+    ORDER BY ID ASC`);
+
+    const insertRoom= db.prepare(`
+      INSERT INTO Spatii(ID, EtajID, Numar, TipModulID, Status)
+      VALUES(?, ?, ?, ?, ?)`);
+
+    let info, floorOptionsRows, floorOptions = {}, roomTypeOptionsRows, roomTypeOptions = {}, err;
+
+    try {
+
+      floorOptionsRows = selectFloorOptions.all();
+
+      for (let i = 0; i < floorOptionsRows.length; i++) {
+
+        floorOptions[`${floorOptionsRows[i].floorOptionValue}`] =  floorOptionsRows[i].floorOptionId;
+
+      }
+
+      floor = Number(floorOptions[`${floor}`]);
+
+      roomTypeOptionsRows = selectRoomTypeOptions.all();
+
+      for (let i = 0; i < roomTypeOptionsRows.length; i++) {
+
+        roomTypeOptions[`${roomTypeOptionsRows[i].roomTypeOptionValue}`] =  roomTypeOptionsRows[i].roomTypeOptionId;
+
+      }
+
+      roomType = Number(roomTypeOptions[`${roomType}`]);
+
+      status = Number(roomStatuses[`${status}`]);
+
+      info = insertRoom.run(
+        Number(id),
+        floor,
+        number.toString(),
+        roomType,
+        status
+      );
+
+    } catch (error) {
+
+      err = error;console.log(err)
+
+    } finally {
+
+      if (!err) {
+
+        res.status(200).json({
+          data: null,
+          error: false,
+          message: 'Adăugat!'
+        });
+
+      } else {
+
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare: adăugare nereușită!'
+        });
+
+      }
+
+    }
+
+  } else {
+
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Eroare: adăugare nereușită!'
+    });
+
+  }
+
+});
+
+/* DELETE rooms */
+router.delete('/hotels/:id/rooms', function(req, res, next){
+
+  const hotelId = Number(req.params.id);
+  const { ids } = req.body;
+  const isValid = ids.every(id => id > 0);
+
+  if (!isNaN(hotelId) && !!ids && ids.length > 0 && isValid) {
+
+    const deleteRoom = db.prepare(`
+      DELETE FROM Spatii
+      WHERE ID = ?`);
+    
+    const deleteRooms = db.transaction( (ids) => {
+
+      for (const id of ids) {
+
+        deleteRoom.run(
+            Number(id)
+        );
+
+      }
+
+    });
+
+    let err;
+
+    try {
+
+      deleteRooms(ids);
 
     } catch (error) {
 
