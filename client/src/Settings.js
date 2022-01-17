@@ -12,6 +12,8 @@ import rates from './rates.svg';
 
 import HotelInformation from './Settings_/HotelInformation';
 import RoomTypes from './Settings_/RoomTypes';
+import Rooms from './Settings_/Rooms';
+import Rates from './Settings_/Rates';
 
 export default function Settings() {
 
@@ -26,8 +28,8 @@ export default function Settings() {
       case 'hotelInformation': { Component = HotelInformation; break; }
       //case 'bedTypes': { Component = BedTypes; break; }
       case 'roomTypes': { Component = RoomTypes; break; }
-      case 'rooms': {}
-      case 'rates': {}
+      case 'rooms': { Component = Rooms; break; }
+      case 'rates': { Component = Rates; break; }
       default: { Component = null; }
 
     }

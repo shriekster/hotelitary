@@ -18,7 +18,7 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 
-export default function RoomTypes(props) {
+export default function Rates(props) {
 
   const [roomTypeOptions, setRoomTypeOptions] = useState(() => []);
   const [bedTypeOptions, setBedTypeOptions] = useState(() => []);
