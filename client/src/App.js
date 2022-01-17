@@ -10,6 +10,8 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 
 import Settings from './Settings';
+import Bookings from './Bookings';
+import Reports from './Reports';
 
 
 function TabPanel(props) {
@@ -22,9 +24,9 @@ function TabPanel(props) {
 
     case 0: { Panel = Settings; break; }
 
-    case 1: { Panel = Settings; break; }
+    case 1: { Panel = Bookings; break; }
 
-    case 2: { Panel = Settings; break; }
+    case 2: { Panel = Reports; break; }
 
     default: { break; }
 
