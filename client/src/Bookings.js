@@ -16,7 +16,7 @@ export default function Bookings() {
         <LocalizationProvider dateAdapter={AdapterDateFns}>
         <Stack spacing={3}>
             <MobileDatePicker
-            label="For mobile"
+            label="Versiunea 1 (mobil)"
             value={value}
             onChange={(newValue) => {
                 setValue(newValue);
@@ -24,7 +24,7 @@ export default function Bookings() {
             renderInput={(params) => <TextField {...params} />}
             />
             <DesktopDatePicker
-            label="For desktop"
+            label="Versiunea 2 (desktop)"
             value={value}
             minDate={new Date('2017-01-01')}
             onChange={(newValue) => {
@@ -34,7 +34,7 @@ export default function Bookings() {
             />
             <DatePicker
             disableFuture
-            label="Responsive"
+            label="Versiunea 3 (responsive)"
             openTo="year"
             views={['year', 'month', 'day']}
             value={value}
@@ -45,6 +45,9 @@ export default function Bookings() {
             />
         </Stack>
         </LocalizationProvider>
+        <div>
+            TABEL REZERVARI
+        </div>
     </div>
   );
 }

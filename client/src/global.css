@@ -35,6 +35,9 @@ html {
     align-items: center;
     justify-content: center;
   }
+  .Bookings-root {
+    flex-direction: column;
+  }
 
   .Settings-root .MuiImageListItem-root:hover {
     background: rgba(53, 186, 246, 0.5);
