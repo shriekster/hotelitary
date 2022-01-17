@@ -733,7 +733,7 @@ router.get('/hotels/:id/rooms', function(req, res, next) {
 
     } catch (error) {
 
-      err = error;console.log(err)
+      err = error;
 
     } finally {
 
@@ -981,7 +981,7 @@ router.post('/hotels/:id/rooms', function(req, res, next) {
 
     } catch (error) {
 
-      err = error;console.log(err)
+      err = error;
 
     } finally {
 
