@@ -912,6 +912,7 @@ router.put('/hotels/:id/rooms/:roomId', function(req, res, next) {
 });
 
 /* POST (CREATE) rooms */
+// TODO: create room intervals!
 router.post('/hotels/:id/rooms', function(req, res, next) {
 
   const roomStatuses = {
