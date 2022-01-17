@@ -28,12 +28,12 @@ export default function Rates(props) {
 
   const columns = [
     //{ field: 'attribute', headerName: '', flex: 1, sortable: false, filterable: false, align: 'center', cellClassName: 'Settings-attribute-cell'},
-    { field: 'id', headerName: 'ID', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', },
-    { field: 'roomCategory', type: 'singleSelect', valueOptions: roomTypeOptions, headerName: 'Tip modul', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
-    { field: 'numberOfBeds', type: 'singleSelect', valueOptions: [1, 2, 3, 4, 5], headerName: 'Paturi', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true,},
-    { field: 'bedType', type: 'singleSelect', valueOptions: bedTypeOptions, headerName: 'Tip pat', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
+    { field: 'id', headerName: 'ID', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', hide: true, },
+    { field: 'index', headerName: 'Nr. crt.', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center',},
+    { field: 'roomType', type: 'singleSelect', valueOptions: roomTypeOptions, headerName: 'Denumire spațiu', flex: 2, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
     { field: 'confortType', type: 'singleSelect', valueOptions: confortTypeOptions, headerName: 'Confort', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true, },
-    { field: 'roomType', headerName: 'Denumire spațiu', flex: 2, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
+    { field: 'rate', headerName: 'Tarif (100%)', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true,},
+    
   ];
 
   const [rows, setRows] = useState(() => []);
@@ -96,7 +96,7 @@ export default function Rates(props) {
       }),
     };
 
-    const response = await fetch(`/api/hotels/1/room-types/${params.id}`, requestOptions);
+    const response = await fetch(`/api/hotels/1/rates/${params.id}`, requestOptions);
     const json = await response.json();
 
     if (response.ok) {
@@ -157,7 +157,7 @@ export default function Rates(props) {
           body: JSON.stringify(rowToAdd.current),
         };
 
-        const response = await fetch(`/api/hotels/1/room-types`, requestOptions);
+        const response = await fetch(`/api/hotels/1/rates`, requestOptions);
         const json = await response.json();
 
         setLoading(false);
@@ -256,7 +256,7 @@ export default function Rates(props) {
 
   }
 
-  useEffect(() => {
+  useEffect(() => {// TODO!!
 
     async function fetchRoomTypes() {
   
@@ -265,7 +265,7 @@ export default function Rates(props) {
         mode: 'cors',
       };
   
-      const response = await fetch('/api/hotels/1/room-types', requestOptions);
+      const response = await fetch('/api/hotels/1/rates', requestOptions);
 
       const json = await response.json();
 
