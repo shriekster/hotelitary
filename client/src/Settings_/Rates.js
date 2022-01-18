@@ -17,6 +17,13 @@ import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
+import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import DatePicker from '@mui/lab/DatePicker';
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
+import ro from 'date-fns/locale/ro';
+
 
 export default function Rates(props) {
 
@@ -43,6 +50,12 @@ export default function Rates(props) {
   const [loading, setLoading] = useState(true);
 
   const [selectionModel, setSelectionModel] = useState([]);
+
+  const [date, setDate] = useState(new Date());
+
+  const dateOptions = ['test1', 'test2'];
+
+  const [existingDate, setExistingDate] = useState(dateOptions[0]);
 
   const rowToAdd = useRef({
     id: '',
@@ -339,8 +352,30 @@ export default function Rates(props) {
           cursor: 'default'
         }}>
           <Typography variant='h6'>
-              Tarife
+              Tarifele de cazare din
           </Typography>
+          <Autocomplete
+            value={existingDate}
+            onChange={(event, newValue) => {
+              setExistingDate(newValue);
+            }}
+            id='existingDates'
+            options={dateOptions}
+            noOptionsText='nu există'
+            size='small'
+            sx={{ width: '300px', marginLeft: '8px'}}
+            renderInput={(params) => <TextField {...params} label='data' />}
+          />
+          {/*
+          <LocalizationProvider dateAdapter={AdapterDateFns}
+            locale={ro}>
+              <DatePicker 
+                value={date}
+                onChange={(newDate) => { setDate(newDate) }}
+                renderInput={(params) => <TextField {...params} />}
+              />
+          </LocalizationProvider>
+          */}
         </div>
       </div>
       <DataGrid sx={{

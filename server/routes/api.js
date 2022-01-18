@@ -1088,7 +1088,7 @@ router.delete('/hotels/:id/rooms', function(req, res, next){
 });
 
 /* GET (READ) rates */
-router.get('/hotels/:id/rates', function(req, res, next) {
+router.get('/hotels/:id/rates/:date', function(req, res, next) {
 
   const hotelId = Number(req.params.id);
 

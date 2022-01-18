@@ -3,10 +3,11 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 
-import BusinessIcon from '@mui/icons-material/Business';
-import OtherHousesIcon from '@mui/icons-material/OtherHouses';
+
+import LocationCityIcon from '@mui/icons-material/LocationCity';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
-import PaymentsIcon from '@mui/icons-material/Payments';
+import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
+import PriceChangeIcon from '@mui/icons-material/PriceChange';
 
 import HotelInformation from './Settings_/HotelInformation';
 import RoomTypes from './Settings_/RoomTypes';
@@ -19,7 +20,7 @@ export default function Settings() {
 
   const itemData = [
     {
-      icon: <BusinessIcon className='Settings-icon' />,
+      icon: <LocationCityIcon className='Settings-icon' />,
       title: 'Informații hotel',
       view: 'hotelInformation',
     },
@@ -31,17 +32,17 @@ export default function Settings() {
     },
     */
     {
-      icon: <OtherHousesIcon className='Settings-icon'/>,
+      icon: <HomeWorkIcon className='Settings-icon'/>,
       title: 'Categorii spații',
       view: 'roomTypes',
     },
     {
-      icon: <HomeWorkIcon className='Settings-icon'/>,
+      icon: <MeetingRoomIcon className='Settings-icon'/>,
       title: 'Spații (camere)',
       view: 'rooms',
     },
     {
-      icon: <PaymentsIcon className='Settings-icon'/>,
+      icon: <PriceChangeIcon className='Settings-icon'/>,
       title: 'Tarife',
       view: 'rates',
     },
