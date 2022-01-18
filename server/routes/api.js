@@ -1295,6 +1295,184 @@ router.get('/hotels/:id/rates/:date', function(req, res, next) {
 
 });
 
+/* PUT (UPDATE) rates */
+router.put('/hotels/:id/rates/:rateId', function(req, res, next) {
+
+  const hotelId = Number(req.params.id);
+  const rateId = Number(req.params.rateId);
+  const field = req.body.field.toString();
+  let value = req.body.value.toString();
+
+  if (!isNaN(hotelId) && !isNaN(rateId) && !!field && !!value) {
+
+    let attribute;
+    
+    switch (field) {
+
+      case 'index': {
+        attribute = 'NumarCurent';
+        break;
+      }
+
+      case 'roomCategory': {
+        attribute = 'TipModulID';
+        break;
+      }
+
+      case 'rate': {
+        attribute = 'Valoare';
+        break;
+      }
+
+      default: {
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare: actualizare nereușită!'
+        });
+        return;
+      }
+
+    }
+
+    const selectRoomTypeOptions = db.prepare(`
+      SELECT ID AS roomTypeOptionId, Denumire AS roomTypeOptionValue
+      FROM TipuriModul
+      ORDER BY ID ASC`);
+
+    const updateRates = db.prepare(`
+      UPDATE Tarife
+      SET ${attribute} = ?
+      WHERE ID = ${rateId}`);
+
+    let info, roomTypeOptionsRows, roomTypeOptions = {}, err;
+
+    try {
+
+      if (field === 'roomCategory') {
+
+        roomTypeOptionsRows = selectRoomTypeOptions.all();
+
+        for (let i = 0; i < roomTypeOptionsRows.length; i++) {
+
+          roomTypeOptions[`${roomTypeOptionsRows[i].roomTypeOptionValue}`] =  roomTypeOptionsRows[i].roomTypeOptionId;
+  
+        }
+
+        value = Number(roomTypeOptions[value]);console.log(value)
+
+      }
+      
+      info = updateRates.run(value);
+
+    } catch (error) {
+
+      err = error;console.log(error)
+
+    } finally {
+
+      if (!err) {
+
+        res.status(200).json({
+          data: null,
+          error: false,
+          message: 'Actualizat!'
+        });
+
+      } else {
+
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare: actualizare nereușită!'
+        });
+
+      }
+
+    }
+
+  } else {
+
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Eroare: actualizare nereușită!'
+    });
+
+  }
+
+});
+
+/* DELETE rates */
+router.delete('/hotels/:id/rates', function(req, res, next){
+
+  const hotelId = Number(req.params.id);
+  const { ids } = req.body;
+  const isValid = ids.every(id => id > 0);
+
+  if (!isNaN(hotelId) && !!ids && ids.length > 0 && isValid) {
+
+    const deleteRate = db.prepare(`
+      DELETE FROM Tarife
+      WHERE ID = ?`);
+    
+    const deleteRates = db.transaction( (ids) => {
+
+      for (const id of ids) {
+
+        deleteRate.run(
+            Number(id)
+        );
+
+      }
+
+    });
+
+    let err;
+
+    try {
+
+      deleteRates(ids);
+
+    } catch (error) {
+
+      err = error;
+
+    } finally {
+
+      if (!err) {
+
+        res.status(200).json({
+          data: null,
+          error: false,
+          message: 'Șters(e)!'
+        });
+
+      } else {
+
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare: ștergere nereușită!'
+        });
+
+      }
+
+    }
+
+  } else {
+
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Eroare: ștergere nereușită!'
+    });
+
+  }
+
+});
+
+
 /* Final route: handler for all the incorrect / invalid requests */
 router.all('*', function(req, res, next) {
   

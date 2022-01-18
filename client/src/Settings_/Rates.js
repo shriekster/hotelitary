@@ -115,8 +115,28 @@ export default function Rates(props) {
     if (response.ok) {
 
       setSnackbar({ children: 'Actualizat!', severity: 'success' });
-      setRows((prevRows) => prevRows.map((row) => (row.id === params.id ? { ...row, [`${params.field}`]: params.value || '---' } : row)),
-    );
+
+      if (params.field === 'roomCategory') {
+
+        const roomTypeOptionIndex = roomTypeOptions.indexOf(params.value);
+
+        if (roomTypeOptionIndex >= 0 && roomTypeOptionIndex <= roomTypeDescriptionOptions.length) {
+
+          const updatedRoomTypeDescription = roomTypeDescriptionOptions[roomTypeOptionIndex];
+
+          setRows((prevRows) => prevRows.map((row) => (row.id === params.id ? { ...row, [`${params.field}`]: params.value || '---', ['roomCategoryDescription']: updatedRoomTypeDescription } : row)));
+
+        } else {
+
+          setRows((prevRows) => prevRows.map((row) => (row.id === params.id ? { ...row, [`${params.field}`]: params.value || '---' } : row)));
+
+        }
+
+      } else {
+
+        setRows((prevRows) => prevRows.map((row) => (row.id === params.id ? { ...row, [`${params.field}`]: params.value || '---' } : row)));
+
+      }
 
     } else {
 
@@ -224,7 +244,7 @@ export default function Rates(props) {
         }),
       };
 
-      const response = await fetch('/api/hotels/1/room-types', requestOptions);
+      const response = await fetch('/api/hotels/1/rates', requestOptions);
       const json = await response.json();
 
       setLoading(false);
@@ -478,7 +498,7 @@ export default function Rates(props) {
           alignItems: 'center',
           justifyContent: 'space-between',
           }}>
-            <Tooltip title={<Typography>{selectionModel.length === 0 ? `Șterge` : `Șterge ${selectionModel.length === 1 ? 'categoria' : 'categoriile'} de spațiu`}</Typography>}
+            <Tooltip title={<Typography variant='body2'>{selectionModel.length === 0 ? `Șterge` : `Șterge ${selectionModel.length === 1 ? 'tariful' : 'tarifele'} din data selectată`}</Typography>}
               arrow={true}
               placement='right'>
               <span>
