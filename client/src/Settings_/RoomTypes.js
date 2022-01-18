@@ -116,7 +116,7 @@ export default function RoomTypes(props) {
 
   const handleAddRow = () => {
 
-    const newId = Math.max(...rows.map((row) => row.id)) + 1;
+    const newId = rows.length > 0 ? Math.max(...rows.map((row) => row.id)) + 1 : 1;
 
     if (rowToAdd.current) {
 

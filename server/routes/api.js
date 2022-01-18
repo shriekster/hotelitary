@@ -926,7 +926,7 @@ router.post('/hotels/:id/rooms', function(req, res, next) {
 
   const hotelId = Number(req.params.id);
 
-  let { id, floor, number, roomType, status } = req.body;
+  let { id, floor, number, roomType, status } = req.body;console.log(req.body)
 
   const isValid = !isNaN(Number(id)) && !!Number(id) && !!floor && !!number && !!roomType && !!status;
 
@@ -942,9 +942,28 @@ router.post('/hotels/:id/rooms', function(req, res, next) {
     FROM TipuriModul
     ORDER BY ID ASC`);
 
-    const insertRoom= db.prepare(`
+    const insertRoom = db.prepare(`
       INSERT INTO Spatii(ID, EtajID, Numar, TipModulID, Status)
       VALUES(?, ?, ?, ?, ?)`);
+    
+    const insertRoomAlt = db.prepare(`
+      INSERT INTO Spatii(EtajID, Numar, TipModulID, Status)
+      VALUES(?, ?, ?, ?)`);
+
+    const insertRooms = db.transaction( (floor, roomType, status, fromRoom, toRoom) => {
+
+      for (let i = fromRoom; i <= toRoom; i++) {
+
+        insertRoomAlt.run(
+            floor,
+            i.toString(),
+            roomType,
+            status
+        );
+
+      }
+
+    });
 
     let info, floorOptionsRows, floorOptions = {}, roomTypeOptionsRows, roomTypeOptions = {}, err;
 
@@ -972,17 +991,45 @@ router.post('/hotels/:id/rooms', function(req, res, next) {
 
       status = Number(roomStatuses[`${status}`]);
 
-      info = insertRoom.run(
-        Number(id),
-        floor,
-        number.toString(),
-        roomType,
-        status
-      );
+      const tokens = number.toString().split('-').filter(token => token !== '');
+
+      if (tokens.length === 2) {
+
+        const fromRoom = Number(tokens[0]);
+        const toRoom = Number(tokens[1]);
+
+        const fromRoomInteger = Math.floor(fromRoom);
+        const toRoomInteger = Math.floor(toRoom);
+
+        if ((fromRoom - fromRoomInteger === 0) && (toRoom - toRoomInteger === 0) && (fromRoomInteger <= toRoomInteger)) {
+
+          insertRooms(
+            floor,
+            roomType,
+            status,
+            fromRoomInteger,
+            toRoomInteger
+          );
+
+        } 
+
+      } else {
+
+        info = insertRoom.run(
+          Number(id),
+          floor,
+          number.toString(),
+          roomType,
+          status
+        );
+
+      }
+
+
 
     } catch (error) {
 
-      err = error;
+      err = error;console.log(error)
 
     } finally {
 
@@ -1007,7 +1054,6 @@ router.post('/hotels/:id/rooms', function(req, res, next) {
     }
 
   } else {
-
     res.status(404).json({
       data: null,
       error: true,

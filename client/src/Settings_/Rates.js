@@ -147,8 +147,8 @@ export default function Rates(props) {
 
   const handleAddRow = () => {
 
-    const newId = Math.max(...rows.map((row) => row.id)) + 1;
-    const newIndex = Math.max(...rows.map((row) => row.index)) + 1;
+    const newId = rows.length > 0 ? Math.max(...rows.map((row) => row.id)) + 1 : 1;
+    const newIndex = rows.length > 0 ? Math.max(...rows.map((row) => row.index)) + 1 : 1;
 
     setRowToAdd((prevRowToAdd) => ({
       ...prevRowToAdd,
