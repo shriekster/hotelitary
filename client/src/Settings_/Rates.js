@@ -355,7 +355,7 @@ export default function Rates(props) {
           left: 0,
           height: 'calc(96vh - 224px)',
           width: '100%',
-          background: 'rgba(255, 255, 255, 0.5)',
+          background: 'rgba(128, 128, 128, 0.25)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -424,7 +424,7 @@ export default function Rates(props) {
                 left: 0,
                 height: '50vh',
                 width: '100%',
-                background: 'rgba(255, 255, 255, 0.5)',
+                background: 'rgba(128, 128, 128, 0.25)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
