@@ -683,7 +683,7 @@ router.get('/hotels/:id/rooms', function(req, res, next) {
     '1': 'rezervat',
     '2': 'ocupat'
       
-  }
+  };
 
   const hotelId = Number(req.params.id);
 
@@ -913,7 +913,6 @@ router.put('/hotels/:id/rooms/:roomId', function(req, res, next) {
 });
 
 /* POST (CREATE) rooms */
-// TODO: create room intervals!
 router.post('/hotels/:id/rooms', function(req, res, next) {
 
   const roomStatuses = {
@@ -924,6 +923,8 @@ router.post('/hotels/:id/rooms', function(req, res, next) {
     'ocupat': '2'
       
   };
+
+  let interval = false, rooms;
 
   const hotelId = Number(req.params.id);
 
@@ -965,6 +966,14 @@ router.post('/hotels/:id/rooms', function(req, res, next) {
       }
 
     });
+
+    // In case of multiple room insertion
+    const selectRooms = db.prepare(`
+      SELECT Spatii.ID AS id, Etaje.Denumire AS floor, Spatii.Numar AS number, TipuriModul.Denumire AS roomType, Status AS status
+      FROM Spatii
+      INNER JOIN Etaje ON Spatii.EtajID = Etaje.ID
+      INNER JOIN TipuriModul ON Spatii.TipModulID = TipuriModul.ID
+      ORDER BY abs(Spatii.Numar) ASC`);
 
     let info, floorOptionsRows, floorOptions = {}, roomTypeOptionsRows, roomTypeOptions = {}, err;
 
@@ -1012,6 +1021,8 @@ router.post('/hotels/:id/rooms', function(req, res, next) {
             toRoomInteger
           );
 
+          interval = true;
+
         } 
 
       } else {
@@ -1026,20 +1037,35 @@ router.post('/hotels/:id/rooms', function(req, res, next) {
 
       }
 
+      if (interval) {
+
+        rooms = selectRooms.all();
+
+        for (let i = 0; i < rooms.length; i++) {
+
+          rooms[i].status = roomStatuses[`${rooms[i].status}`];
+  
+        }
+
+      }
+
 
 
     } catch (error) {
 
-      err = error;console.log(error)
+      err = error;
+      interval = false;
 
     } finally {
 
       if (!err) {
 
         res.status(200).json({
-          data: null,
+          data: {
+            rooms: interval ? rooms : undefined,
+          },
           error: false,
-          message: 'Adăugat!'
+          message: 'Adăugat!',
         });
 
       } else {

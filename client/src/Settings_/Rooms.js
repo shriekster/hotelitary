@@ -39,7 +39,7 @@ function CustomPagination() {
       onChange={(event, value) => apiRef.current.setPage(value - 1)}
     />
   );
-  
+
 }
 
 export default function Rooms(props) {
@@ -199,8 +199,18 @@ export default function Rooms(props) {
 
         if (response.ok) {
           
-          const newRows = [...rows];
-          newRows.push({...rowToAdd.current});
+          let newRows = [...rows];
+
+          if (json.data && json.data.rooms && json.data.rooms.length) {
+
+            newRows = [...json.data.rooms];
+
+          } else {
+
+            newRows.push({...rowToAdd.current});
+
+          }
+          
           setRows(newRows);
           setSnackbar({ children: 'Adăugat!', severity: 'success' });
 
