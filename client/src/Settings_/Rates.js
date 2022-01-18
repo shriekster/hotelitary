@@ -16,6 +16,7 @@ import IconButton from '@mui/material/IconButton';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined';
 
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -28,17 +29,16 @@ import ro from 'date-fns/locale/ro';
 export default function Rates(props) {
 
   const [roomTypeOptions, setRoomTypeOptions] = useState(() => []);
-  const [bedTypeOptions, setBedTypeOptions] = useState(() => []);
-  const [confortTypeOptions, setConfortTypeOptions] = useState(() => []);
+  const [roomTypeDescriptionOptions, setRoomTypeDescriptionOptions] = useState([]);
 
   const [snackbar, setSnackbar] = useState(null);
 
   const columns = [
     //{ field: 'attribute', headerName: '', flex: 1, sortable: false, filterable: false, align: 'center', cellClassName: 'Settings-attribute-cell'},
     { field: 'id', headerName: 'ID', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', hide: true, },
-    { field: 'index', headerName: 'Nr. crt.', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center',},
-    { field: 'roomType', type: 'singleSelect', valueOptions: roomTypeOptions, headerName: 'Denumire spațiu', flex: 2, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
-    { field: 'confortType', type: 'singleSelect', valueOptions: confortTypeOptions, headerName: 'Confort', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true, },
+    { field: 'index', headerName: 'Nr. crt.', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
+    { field: 'roomCategory', type: 'singleSelect', valueOptions: roomTypeOptions, headerName: 'Denumire spațiu', flex: 2, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
+    { field: 'roomCategoryDescription', type: 'singleSelect', valueOptions: roomTypeOptions, headerName: 'Descriere', flex: 2, sortable: false, filterable: false, align: 'center', headerAlign: 'center',},
     { field: 'rate', headerName: 'Tarif (100%)', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true,},
     
   ];
@@ -53,9 +53,9 @@ export default function Rates(props) {
 
   const [date, setDate] = useState(new Date());
 
-  const dateOptions = ['test1', 'test2'];
+  const [existingDates, setExistingDates] = useState(['--.--.----']);
 
-  const [existingDate, setExistingDate] = useState(dateOptions[0]);
+  const [selectedDateIndex, setSelectedDateIndex] = useState(0);
 
   const rowToAdd = useRef({
     id: '',
@@ -269,16 +269,23 @@ export default function Rates(props) {
 
   }
 
-  useEffect(() => {// TODO!!
+  const handleExistingDateChange = async (event, newValue) => {
 
-    async function fetchRoomTypes() {
+    const formattedDate = newValue.split('.').reverse().join('-');
+
+    const index = existingDates.indexOf(newValue);
+
+    if (index >= 0 && index < existingDates.length) {
+      
+      setLoading(true);
+      setSelectedDateIndex(index);
   
       const requestOptions = {
         method: 'GET',
         mode: 'cors',
       };
   
-      const response = await fetch('/api/hotels/1/rates', requestOptions);
+      const response = await fetch(`/api/hotels/1/rates/${formattedDate}`, requestOptions);
 
       const json = await response.json();
 
@@ -290,14 +297,59 @@ export default function Rates(props) {
 
           const data = json.data;
 
-          const newRoomTypeOptions = [...data.roomOptions];
-          const newBedTypeOptions = [...data.bedOptions]
-          const newConfortTypeOptions = [...data.confortOptions];
-          const newRows = [...data.roomTypes];
+          const newRows = [...data.rates];
+  
+          setRows((prevRows) => (newRows));
 
+        } else {
+
+          setSnackbar({ children: json.message, severity: 'error' });
+
+        }
+
+      } else {
+
+        setSnackbar({ children: json.message, severity: 'error' });
+
+      }
+
+  }
+
+}
+
+  const handleAddTable = () => {
+
+  }
+
+  useEffect(() => {// TODO!!
+
+    async function fetchHistoryAndLatestRates() {
+  
+      const requestOptions = {
+        method: 'GET',
+        mode: 'cors',
+      };
+  
+      const response = await fetch('/api/hotels/1/rates/history', requestOptions);
+
+      const json = await response.json();
+
+      setLoading(false);
+
+      if (response.ok) {
+
+        if (!json.error) {
+
+          const data = json.data;
+
+          const newExistingDates = [...data.dates];
+          const newRoomTypeOptions = [...data.roomTypeOptions];
+          const newRoomTypeDescriptionOptions = [...data.roomTypeDescriptionOptions];
+          const newRows = [...data.rates];
+
+          setExistingDates(newExistingDates);
           setRoomTypeOptions(newRoomTypeOptions);
-          setBedTypeOptions(newBedTypeOptions);
-          setConfortTypeOptions(newConfortTypeOptions);
+          setRoomTypeDescriptionOptions(newRoomTypeDescriptionOptions);
   
           setRows((prevRows) => (newRows));
 
@@ -315,7 +367,7 @@ export default function Rates(props) {
   
     }
 
-    fetchRoomTypes();
+    fetchHistoryAndLatestRates();
   
   }, []);
 
@@ -355,17 +407,26 @@ export default function Rates(props) {
               Tarifele de cazare din
           </Typography>
           <Autocomplete
-            value={existingDate}
-            onChange={(event, newValue) => {
-              setExistingDate(newValue);
-            }}
+            disableClearable
+            value={existingDates[selectedDateIndex]}
+            onChange={handleExistingDateChange}
             id='existingDates'
-            options={dateOptions}
+            options={existingDates}
             noOptionsText='nu există'
             size='small'
             sx={{ width: '300px', marginLeft: '8px'}}
-            renderInput={(params) => <TextField {...params} label='data' />}
+            renderInput={(params) => <TextField {...params}/>}
           />
+          <Tooltip title={<Typography variant='body2'>Adaugă set de tarife (actualizare)</Typography>}
+            arrow={true}
+            placement='right'>
+            <IconButton sx={{
+              marginLeft: '4px',
+            }}
+            onClick={handleAddTable}>
+              <AddBoxOutlinedIcon fontSize='large' />
+            </IconButton>
+          </Tooltip>
           {/*
           <LocalizationProvider dateAdapter={AdapterDateFns}
             locale={ro}>
@@ -429,7 +490,7 @@ export default function Rates(props) {
               </IconButton>
               </span>
             </Tooltip>
-            <Tooltip title={<Typography>Adaugă o categorie de spațiu</Typography>}
+            <Tooltip title={<Typography variant='body2'>Adaugă un tarif la data selectată</Typography>}
               arrow={true}
               placement='left'>
               <Fab color='primary' 

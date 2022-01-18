@@ -1087,61 +1087,171 @@ router.delete('/hotels/:id/rooms', function(req, res, next){
 
 });
 
-/* GET (READ) rates */
-router.get('/hotels/:id/rates/:date', function(req, res, next) {
+/* GET (READ) rates history (dates) and latest rates */
+router.get('/hotels/:id/rates/history', function(req, res, next) {
 
   const hotelId = Number(req.params.id);
 
   if (!isNaN(hotelId)) {
 
-    const selectRoomOptions = db.prepare(`
-      SELECT ID AS roomOptionId, Denumire AS roomOptionValue
-      FROM Module
-      ORDER BY ID ASC`);
+    const selectDates = db.prepare(`
+      SELECT ID AS id, Data AS date
+      FROM ActualizariTarife
+      ORDER BY Data DESC`);
 
-    const selectBedOptions = db.prepare(`
-      SELECT ID AS bedOptionId, Denumire AS bedOptionValue, Locuri AS bedOptionCapacity
-      FROM Paturi
-      ORDER BY ID ASC`);
-
-    const selectConfortOptions = db.prepare(`
-      SELECT ID AS confortOptionId, Denumire AS confortOptionValue
-      FROM Confort
-      ORDER BY ID ASC`);
-
-    const selectRoomTypes = db.prepare(`
-      SELECT TipuriModul.ID AS id, Module.Denumire AS roomCategory, TipuriModul.Paturi AS numberOfBeds, Paturi.Denumire AS bedType, Confort.Denumire AS confortType, TipuriModul.Denumire AS roomType
-      FROM TipuriModul
-      INNER JOIN Module ON TipuriModul.ModulID = Module.ID
+    const selectRateInformation = db.prepare(`
+      SELECT
+        Tarife.ID AS id, 
+        Tarife.NumarCurent AS "index", 
+        TipuriModul.Denumire AS roomCategory, 
+        ('confort ' || Confort.Denumire || ' - ' || TipuriModul.Paturi || ' x pat ' || Paturi.Denumire) AS roomCategoryDescription, 
+        Tarife.Valoare AS rate
+      FROM ActualizariTarife
+      INNER JOIN Tarife ON ActualizariTarife.ID = Tarife.ActualizareID
+      INNER JOIN TipuriModul ON Tarife.TipModulID = TipuriModul.ID
+      INNER JOIN Confort ON TipuriModul.ConfortID = Confort.ID
       INNER JOIN Paturi ON TipuriModul.PatID = Paturi.ID
-      INNER JOIN Confort ON TipuriModul.ConfortID = Confort.ID`);
+      WHERE ActualizariTarife.ID = ?`);
 
-    let roomOptionsRows, roomOptions = [], bedOptionsRows, bedOptions = [], confortOptionsRows, confortOptions = [], roomTypes, err;
+    const selectRoomCategories = db.prepare(`
+      SELECT TipuriModul.Denumire AS roomCategory
+      FROM TipuriModul`);
+
+    const selectRoomCategoriesDescriptions = db.prepare(`
+      SELECT 
+          ('confort ' || Confort.Denumire || ' - ' || TipuriModul.Paturi || ' x pat ' || Paturi.Denumire) AS roomCategoryDescription
+      FROM TipuriModul
+      INNER JOIN Confort ON TipuriModul.ConfortID = Confort.ID
+      INNER JOIN Paturi ON TipuriModul.PatID = Paturi.ID`);
+
+    let dateRows, dates = [], latestRatesId, roomCategoriesRows, roomCategories = [], roomCategoriesDescriptionsRows, roomCategoriesDescriptions = [], rateInformation, err;
 
     try {
 
-      roomOptionsRows = selectRoomOptions.all();
-      bedOptionsRows = selectBedOptions.all();
-      confortOptionsRows = selectConfortOptions.all();
-      roomTypes = selectRoomTypes.all();
+      dateRows = selectDates.all();
 
-      for (let i = 0; i < roomOptionsRows.length; i++) {
+      for (let i = 0; i < dateRows.length; i++) {
 
-        roomOptions.push(roomOptionsRows[i].roomOptionValue);
+        const formattedDate = dateRows[i].date.split('-').reverse().join('.');
 
-      }
-
-      for (let i = 0; i < bedOptionsRows.length; i++) {
-
-        bedOptions.push(bedOptionsRows[i].bedOptionValue);
+        dates.push(formattedDate);
 
       }
 
-      for (let i = 0; i < confortOptionsRows.length; i++) {
+      latestRatesId = dateRows[0].id;
 
-        confortOptions.push(confortOptionsRows[i].confortOptionValue);
+      roomCategoriesRows = selectRoomCategories.all();
+
+      for (let i = 0; i < roomCategoriesRows.length; i++) {
+
+        roomCategories.push(roomCategoriesRows[i].roomCategory);
 
       }
+
+      roomCategoriesDescriptionsRows = selectRoomCategoriesDescriptions.all();
+
+      for (let i = 0; i < roomCategoriesDescriptionsRows.length; i++) {
+
+        roomCategoriesDescriptions.push(roomCategoriesDescriptionsRows[i].roomCategoryDescription)
+
+      }
+
+    } catch (error) {
+
+      err = error;
+
+    } finally {
+
+      if (!err) {
+
+        try {
+
+          rateInformation = selectRateInformation.all(latestRatesId);
+
+        } catch (error) {
+
+          err = error;
+
+        } finally {
+
+          if (!err) {
+
+            res.status(200).json({
+
+              data: {
+                dates: dates,
+                roomTypeOptions: roomCategories,
+                roomTypeDescriptionOptions: roomCategoriesDescriptions,
+                rates: rateInformation,
+              },
+              error: false,
+              message: 'ok'
+    
+            });
+
+          } else {
+
+            res.status(404).json({
+              data: null,
+              error: true,
+              message: 'Informația solicitată nu există!'
+            });
+
+          }
+
+        }
+
+      } else {
+
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Informația solicitată nu există!'
+        });
+
+      }
+
+    }
+
+  } else {
+
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Informația solicitată nu există!'
+    });
+
+  }
+
+});
+
+/* GET (READ) rates */
+router.get('/hotels/:id/rates/:date', function(req, res, next) {
+
+  const hotelId = Number(req.params.id);
+  const date = req.params.date;
+
+  if (!isNaN(hotelId) && new Date(date).toString() !== 'Invalid Date') {
+
+    const selectRateInformation = db.prepare(`
+      SELECT
+        Tarife.ID AS id, 
+        Tarife.NumarCurent AS "index", 
+        TipuriModul.Denumire AS roomCategory, 
+        ('confort ' || Confort.Denumire || ' - ' || TipuriModul.Paturi || ' x pat ' || Paturi.Denumire) AS roomCategoryDescription, 
+        Tarife.Valoare AS rate
+      FROM ActualizariTarife
+      INNER JOIN Tarife ON ActualizariTarife.ID = Tarife.ActualizareID
+      INNER JOIN TipuriModul ON Tarife.TipModulID = TipuriModul.ID
+      INNER JOIN Confort ON TipuriModul.ConfortID = Confort.ID
+      INNER JOIN Paturi ON TipuriModul.PatID = Paturi.ID
+      WHERE ActualizariTarife.Data = ?`);
+
+    let rateInformation, err;
+
+    try {
+
+      rateInformation = selectRateInformation.all(date);
 
     } catch (error) {
 
@@ -1154,10 +1264,7 @@ router.get('/hotels/:id/rates/:date', function(req, res, next) {
         res.status(200).json({
 
           data: {
-            roomOptions: roomOptions,
-            bedOptions: bedOptions,
-            confortOptions: confortOptions,
-            roomTypes: roomTypes,
+            rates: rateInformation,
           },
           error: false,
           message: 'ok'
