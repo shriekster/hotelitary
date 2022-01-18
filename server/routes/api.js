@@ -703,7 +703,8 @@ router.get('/hotels/:id/rooms', function(req, res, next) {
       SELECT Spatii.ID AS id, Etaje.Denumire AS floor, Spatii.Numar AS number, TipuriModul.Denumire AS roomType, Status AS status
       FROM Spatii
       INNER JOIN Etaje ON Spatii.EtajID = Etaje.ID
-      INNER JOIN TipuriModul ON Spatii.TipModulID = TipuriModul.ID`);
+      INNER JOIN TipuriModul ON Spatii.TipModulID = TipuriModul.ID
+      ORDER BY abs(Spatii.Numar) ASC`);
 
     let floorOptionsRows, floorOptions = [], roomTypeOptionsRows, roomTypeOptions = [], rooms, err;
 

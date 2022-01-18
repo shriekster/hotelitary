@@ -3,7 +3,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 
-import { DataGrid, GridRowsProp, GridColDef } from '@mui/x-data-grid';
+import { DataGrid, GridRowsProp, GridColDef,   
+  gridPageCountSelector,
+  gridPageSelector,
+  useGridApiContext,
+  useGridSelector, } from '@mui/x-data-grid';
+import Pagination from '@mui/material/Pagination';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import Tooltip from '@mui/material/Tooltip';
@@ -19,6 +24,23 @@ import IconButton from '@mui/material/IconButton';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+
+function CustomPagination() {
+
+  const apiRef = useGridApiContext();
+  const page = useGridSelector(apiRef, gridPageSelector);
+  const pageCount = useGridSelector(apiRef, gridPageCountSelector);
+
+  return (
+    <Pagination
+      color="primary"
+      count={pageCount}
+      page={page + 1}
+      onChange={(event, value) => apiRef.current.setPage(value - 1)}
+    />
+  );
+  
+}
 
 export default function Rooms(props) {
 
@@ -357,16 +379,20 @@ export default function Rooms(props) {
         rows={rows} 
         columns={columns}
         onCellEditCommit={handleCellEditCommit}
-        disableColumnMenu 
-        hideFooterPagination 
+        disableColumnMenu
+        pagination
         hideFooterSelectedRowCount
         localeText={{
-          noRowsLabel: 'Nu există date'
+          noRowsLabel: 'Nu există date',
+          footerTotalVisibleRows: (visibleCount, totalCount) => `${visibleCount.toLocaleString()} din ${totalCount.toLocaleString()}`,
         }} 
         checkboxSelection
         disableSelectionOnClick
         onSelectionModelChange={handleSelectionModelChange}
-        selectionModel={selectionModel} />
+        selectionModel={selectionModel} 
+        components={{
+          Pagination: CustomPagination,
+        }}/>
       {
         loading &&
         <div style={{
