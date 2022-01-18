@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-//test
+
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import Tooltip from '@mui/material/Tooltip';
 
 import SettingsIcon from '@mui/icons-material/Settings';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
@@ -55,15 +56,12 @@ function a11yProps(index) {
   return {
     id: `tab-${index}`,
     'aria-controls': `tabpanel-${index}`,
-    sx: {
-      justifyContent: 'start',
-    }
   };
 }
 
 function App() {
 
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(1);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -89,15 +87,24 @@ function App() {
           }
         }}
       >
-        <Tab icon={<SettingsIcon />}
-          iconPosition='start' 
-          label={<Typography sx={{textTransform: 'none', fontSize: '1.2rem', paddingRight: 1}}>Setări</Typography>} {...a11yProps(0)} />
-        <Tab icon={<MenuBookIcon />}
-          iconPosition='start'  
-          label={<Typography sx={{textTransform: 'none', fontSize: '1.2rem', paddingRight: 1}}>Rezervări</Typography>} {...a11yProps(1)} />
-        <Tab icon={<LibraryBooksIcon />}
-          iconPosition='start'  
-          label={<Typography sx={{textTransform: 'none', fontSize: '1.2rem', paddingRight: 1}}>Raportări</Typography>} {...a11yProps(2)} />
+        <Tooltip title={<Typography>Setări</Typography>}
+          placement='right'
+          arrow>
+          <Tab icon={<SettingsIcon />}
+            {...a11yProps(0)} />
+        </Tooltip>
+        <Tooltip title={<Typography>Rezervări</Typography>}
+          placement='right'
+          arrow>
+          <Tab icon={<MenuBookIcon />}
+            {...a11yProps(1)} />
+        </Tooltip>
+        <Tooltip title={<Typography>Raportări</Typography>}
+          placement='right'
+          arrow>
+          <Tab icon={<LibraryBooksIcon />}
+            {...a11yProps(2)} />
+        </Tooltip>
       </Tabs>
       <TabPanel value={value} index={0}>
         SETĂRI

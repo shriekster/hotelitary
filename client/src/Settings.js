@@ -3,8 +3,17 @@ import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
 import SettingsIcon from '@mui/icons-material/Settings';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
 
-import hotelInformation from './hotel-information.svg';
+import BusinessIcon from '@mui/icons-material/Business';
+import OtherHousesIcon from '@mui/icons-material/OtherHouses';
+import HomeWorkIcon from '@mui/icons-material/HomeWork';
+import PaymentsIcon from '@mui/icons-material/Payments';
+
+import Grid from '@mui/material/Grid';
+
+//import hotelInformation from './hotel-information.svg';
 //import bedTypes from './bed-types.svg'; // later
 import roomTypes from './room-types.svg';
 import rooms from './rooms.svg';
@@ -64,6 +73,7 @@ export default function Settings() {
     <div className='Settings-root'>
       {
         view === 'overview' ? (
+        /*
         <ImageList sx={{ 
             width: '96%', 
             height: '96vh',
@@ -101,6 +111,36 @@ export default function Settings() {
             </ImageListItem>
           ))}
         </ImageList>
+        */
+        <Grid sx={{
+          height: '96vh',
+          width: '96%',
+          border: '1px solid black'
+        }} container columns={2}>
+          {
+            itemData.map((item) =>(
+              <Grid key={item.title} className='Settings-item' item>
+                <IconButton sx={{ borderRadius: '2px', 
+                    width: '100%', 
+                    height: 'calc(100% - 56px)'
+                  }}
+                  color='primary'
+                  onClick={() => { handleItemClick(item.view) }}>
+                  {item.icon}
+                </IconButton>
+                <Typography sx={{
+                  height: '56px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'default',
+                }}>
+                    {item.title}
+                  </Typography>
+              </Grid>
+            ))
+          }
+       </Grid>
         ) : (
           selectView(view)
         )
@@ -111,7 +151,7 @@ export default function Settings() {
 
 const itemData = [
   {
-    img: hotelInformation,
+    icon: <BusinessIcon className='Settings-icon' />,
     title: 'Informații hotel',
     view: 'hotelInformation',
   },
@@ -123,17 +163,17 @@ const itemData = [
   },
   */
   {
-    img: roomTypes,
+    icon: <OtherHousesIcon className='Settings-icon'/>,
     title: 'Categorii spații',
     view: 'roomTypes',
   },
   {
-    img: rooms,
+    icon: <HomeWorkIcon className='Settings-icon'/>,
     title: 'Spații (camere)',
     view: 'rooms',
   },
   {
-    img: rates,
+    icon: <PaymentsIcon className='Settings-icon'/>,
     title: 'Tarife',
     view: 'rates',
   },

@@ -28,7 +28,7 @@ export default function RoomTypes(props) {
 
   const columns = [
     //{ field: 'attribute', headerName: '', flex: 1, sortable: false, filterable: false, align: 'center', cellClassName: 'Settings-attribute-cell'},
-    { field: 'id', headerName: 'ID', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', },
+    { field: 'id', headerName: 'ID', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', hide: true, },
     { field: 'roomCategory', type: 'singleSelect', valueOptions: roomTypeOptions, headerName: 'Tip modul', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
     { field: 'numberOfBeds', type: 'singleSelect', valueOptions: [1, 2, 3, 4, 5], headerName: 'Paturi', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true,},
     { field: 'bedType', type: 'singleSelect', valueOptions: bedTypeOptions, headerName: 'Tip pat', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},

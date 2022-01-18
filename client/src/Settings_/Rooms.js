@@ -29,7 +29,7 @@ export default function Rooms(props) {
 
   const columns = [
     //{ field: 'attribute', headerName: '', flex: 1, sortable: false, filterable: false, align: 'center', cellClassName: 'Settings-attribute-cell'},
-    { field: 'id', headerName: 'ID', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', },
+    { field: 'id', headerName: 'ID', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', hide: true },
     { field: 'floor', type: 'singleSelect', valueOptions: floorOptions, headerName: 'Etaj', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
     { field: 'number', headerName: 'Număr', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true,},
     { field: 'roomType', type: 'singleSelect', valueOptions: roomTypeOptions, headerName: 'Denumire spațiu', flex: 2, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
