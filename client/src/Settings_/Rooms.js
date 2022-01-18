@@ -338,6 +338,18 @@ export default function Rooms(props) {
             <NavigateBeforeIcon fontSize='large'/>
           </IconButton>
         </Tooltip>
+        <div style={{
+          height: '56px',
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'default'
+        }}>
+          <Typography variant='h6'>
+              Spații (camere)
+          </Typography>
+        </div>
       </div>
       <DataGrid sx={{
           width: '100%',
