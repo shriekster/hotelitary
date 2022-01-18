@@ -26,7 +26,7 @@ export default function Settings() {
     },
     /*
     {
-      img: bedTypes,
+      icon: <></>, // FUTURE WORK
       title: 'Categorii paturi',
       view: 'bedTypes',
     },
