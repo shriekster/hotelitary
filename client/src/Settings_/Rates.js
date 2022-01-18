@@ -38,7 +38,7 @@ export default function Rates(props) {
     { field: 'id', headerName: 'ID', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', hide: true, },
     { field: 'index', headerName: 'Nr. crt.', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
     { field: 'roomCategory', type: 'singleSelect', valueOptions: roomTypeOptions, headerName: 'Denumire spațiu', flex: 2, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
-    { field: 'roomCategoryDescription', type: 'singleSelect', valueOptions: roomTypeOptions, headerName: 'Descriere', flex: 2, sortable: false, filterable: false, align: 'center', headerAlign: 'center',},
+    { field: 'roomCategoryDescription', type: 'singleSelect', valueOptions: roomTypeDescriptionOptions, headerName: 'Descriere', flex: 2, sortable: false, filterable: false, align: 'center', headerAlign: 'center',},
     { field: 'rate', headerName: 'Tarif (100%)', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true,},
     
   ];
@@ -57,13 +57,16 @@ export default function Rates(props) {
 
   const [selectedDateIndex, setSelectedDateIndex] = useState(0);
 
-  const rowToAdd = useRef({
+  const [openOtherDialog, setOpenOtherDialog] = useState(false);////////////
+
+  const descriptionMap = useRef(null);
+
+  const [rowToAdd, setRowToAdd] = useState({
     id: '',
+    index: '',
     roomCategory: '',
-    numberOfBeds: '',
-    bedType: '',
-    confortType: '',
-    roomType: '',
+    roomCategoryDescription: '',
+    rate: '',
   });
 
   const handleCloseSnackbar = () => {
@@ -74,16 +77,15 @@ export default function Rates(props) {
     
     if (!loading) {
 
-      if (rowToAdd.current) {
+      setRowToAdd((prevRowToAdd) => ({
+        ...prevRowToAdd,
+        id: '',
+        index: '',
+        roomCategory: '',
+        roomCategoryDescription: '',
+        rate: '',
 
-        rowToAdd.current.id = '';
-        rowToAdd.current.roomCategory = '';
-        rowToAdd.current.numberOfBeds = '';
-        rowToAdd.current.bedType = '';
-        rowToAdd.current.confortType = '';
-        rowToAdd.current.roomType = '';
-  
-      }
+      }));
 
       setOpenDialog(false);
 
@@ -118,13 +120,9 @@ export default function Rates(props) {
 
       if (params.field === 'roomCategory') {
 
-        const roomTypeOptionIndex = roomTypeOptions.indexOf(params.value);
+        if (!!descriptionMap.current && !!descriptionMap.current[`${params.value}`]) {
 
-        if (roomTypeOptionIndex >= 0 && roomTypeOptionIndex <= roomTypeDescriptionOptions.length) {
-
-          const updatedRoomTypeDescription = roomTypeDescriptionOptions[roomTypeOptionIndex];
-
-          setRows((prevRows) => prevRows.map((row) => (row.id === params.id ? { ...row, [`${params.field}`]: params.value || '---', ['roomCategoryDescription']: updatedRoomTypeDescription } : row)));
+          setRows((prevRows) => prevRows.map((row) => (row.id === params.id ? { ...row, [`${params.field}`]: params.value || '---', ['roomCategoryDescription']: descriptionMap.current[`${params.value}`] } : row)));
 
         } else {
 
@@ -150,78 +148,95 @@ export default function Rates(props) {
   const handleAddRow = () => {
 
     const newId = Math.max(...rows.map((row) => row.id)) + 1;
+    const newIndex = Math.max(...rows.map((row) => row.index)) + 1;
 
-    if (rowToAdd.current) {
+    setRowToAdd((prevRowToAdd) => ({
+      ...prevRowToAdd,
+      id: newId,
+      index: newIndex,
+      roomCategory: '',
+      roomCategoryDescription: '',
+      rate: '',
 
-      rowToAdd.current.id = newId;
-
-    }
+    }));
 
     setOpenDialog(true);
     
   }
 
   const handleNewCellEditCommit = (params) => {
+    
+    setRowToAdd((prevRowToAdd) => ({
+      ...prevRowToAdd,
+      [`${params.field}`]: params.value,
+    }));
 
-    if (rowToAdd.current) {
+    if (params.field === 'roomCategory') {
 
-      rowToAdd.current[`${params.field}`] = params.value;
+      if (!!descriptionMap.current && !!descriptionMap.current[`${params.value}`]) {
 
-    }
+          setRowToAdd((prevRowToAdd) => ({
+            ...prevRowToAdd,
+            ['roomCategoryDescription']: descriptionMap.current[`${params.value}`],
+          }));
+
+      } 
+
+    }   
 
   }
 
   const handleSaveRow = async () => {
 
-    if (rowToAdd.current) {
+    const { id, index, roomCategory, roomCategoryDescription, rate } = rowToAdd;
 
-      const { id, roomCategory, numberOfBeds, bedType, confortType, roomType } = rowToAdd.current;
+    if (!!id && !!index && !!roomCategory && !!roomCategoryDescription && !!rate) {
 
-      if (!!id && !!roomCategory && !!numberOfBeds && !!bedType && !!confortType && !!roomType) {
+      setLoading(true);
 
-        setLoading(true);
+      const requestOptions = {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(rowToAdd),
+      };
 
-        const requestOptions = {
-          method: 'POST',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(rowToAdd.current),
-        };
+      const response = await fetch(`/api/hotels/1/rates`, requestOptions);
+      const json = await response.json();
 
-        const response = await fetch(`/api/hotels/1/rates`, requestOptions);
-        const json = await response.json();
+      setLoading(false);
+      setOpenDialog(false);
 
-        setLoading(false);
-        setOpenDialog(false);
-
-        if (response.ok) {
-          
-          const newRows = [...rows];
-          newRows.push({...rowToAdd.current});
-          setRows(newRows);
-          setSnackbar({ children: 'Adăugat!', severity: 'success' });
-
-        } else {
-
-          setSnackbar({ children: json.message, severity: 'error' });
-          setRows((prevRows) => [...prevRows]);
-
-        }
-
-        rowToAdd.current.id = '';
-        rowToAdd.current.roomCategory = '';
-        rowToAdd.current.numberOfBeds = '';
-        rowToAdd.current.bedType = '';
-        rowToAdd.current.confortType = '';
-        rowToAdd.current.roomType = '';
+      if (response.ok) {
+        
+        const newRows = [...rows];
+        newRows.push({...rowToAdd});
+        setRows(newRows);
+        setSnackbar({ children: 'Adăugat!', severity: 'success' });
 
       } else {
 
-        setSnackbar({ children: 'Completează toate câmpurile!', severity: 'error' });
+        setSnackbar({ children: json.message, severity: 'error' });
+        setRows((prevRows) => [...prevRows]);
 
       }
+
+      queueMicrotask(() => {
+        setRowToAdd((prevRowToAdd) => ({
+          ...prevRowToAdd,
+          id: '',
+          index: '',
+          roomCategory: '',
+          roomCategoryDescription: '',
+          rate: '',
+        }));
+      });
+
+    } else {
+
+      setSnackbar({ children: 'Completează toate câmpurile!', severity: 'error' });
 
     }
 
@@ -268,16 +283,14 @@ export default function Rates(props) {
 
   const handleCancelRow = () => {
 
-    if (rowToAdd.current) {
-
-      rowToAdd.current.id = '';
-      rowToAdd.current.roomCategory = '';
-      rowToAdd.current.numberOfBeds = '';
-      rowToAdd.current.bedType = '';
-      rowToAdd.current.confortType = '';
-      rowToAdd.current.roomType = '';
-
-    }
+    setRowToAdd((prevRowToAdd) => ({
+      ...prevRowToAdd,
+      id: '',
+      index: '',
+      roomCategory: '',
+      roomCategoryDescription: '',
+      rate: '',
+    }));
 
     setOpenDialog(false);
 
@@ -366,6 +379,8 @@ export default function Rates(props) {
           const newRoomTypeOptions = [...data.roomTypeOptions];
           const newRoomTypeDescriptionOptions = [...data.roomTypeDescriptionOptions];
           const newRows = [...data.rates];
+
+          descriptionMap.current = data.roomTypeDescriptionMap;
 
           setExistingDates(newExistingDates);
           setRoomTypeOptions(newRoomTypeOptions);
@@ -525,7 +540,7 @@ export default function Rates(props) {
           onClose={handleCloseDialog} 
           open={openDialog}>
           <DialogTitle sx={{textAlign: 'center'}}>
-            Adaugă o categorie de spațiu
+            Adaugă un tarif valabil începând cu {existingDates[selectedDateIndex]}
           </DialogTitle>
           <DialogContent sx={{
             height: '50vh',
@@ -534,7 +549,7 @@ export default function Rates(props) {
           <DataGrid sx={{
               width: '100%',
             }} 
-            rows={[rowToAdd.current]} 
+            rows={[rowToAdd]} 
             columns={columns}
             onCellEditCommit={handleNewCellEditCommit}
             disableColumnMenu 

@@ -1087,7 +1087,7 @@ router.delete('/hotels/:id/rooms', function(req, res, next){
 
 });
 
-/* GET (READ) rates history (dates) and latest rates */
+/* GET (READ) rates history (dates), latest rates AND room (categories) description mapping */
 router.get('/hotels/:id/rates/history', function(req, res, next) {
 
   const hotelId = Number(req.params.id);
@@ -1124,7 +1124,16 @@ router.get('/hotels/:id/rates/history', function(req, res, next) {
       INNER JOIN Confort ON TipuriModul.ConfortID = Confort.ID
       INNER JOIN Paturi ON TipuriModul.PatID = Paturi.ID`);
 
-    let dateRows, dates = [], latestRatesId, roomCategoriesRows, roomCategories = [], roomCategoriesDescriptionsRows, roomCategoriesDescriptions = [], rateInformation, err;
+    const selectRoomCategoriesAndDescriptions = db.prepare(`
+      SELECT
+          TipuriModul.Denumire AS roomCategory,
+          ('confort ' || Confort.Denumire || ' - ' || TipuriModul.Paturi || ' x pat ' || Paturi.Denumire) AS roomCategoryDescription 
+      FROM TipuriModul
+      INNER JOIN Confort ON TipuriModul.ConfortID = Confort.ID
+      INNER JOIN Paturi ON TipuriModul.PatID = Paturi.ID`);
+
+    let dateRows, dates = [], latestRatesId, roomCategoriesRows, roomCategories = [], 
+      roomCategoriesDescriptionsRows, roomCategoriesDescriptions = [], rateInformation, roomCategoriesAndDescriptionsRows, descriptionMap = {}, err;
 
     try {
 
@@ -1156,6 +1165,14 @@ router.get('/hotels/:id/rates/history', function(req, res, next) {
 
       }
 
+      roomCategoriesAndDescriptionsRows = selectRoomCategoriesAndDescriptions.all();
+
+      for (let i = 0; i < roomCategoriesAndDescriptionsRows.length; i++) {
+
+        descriptionMap[`${roomCategoriesAndDescriptionsRows[i].roomCategory}`] = roomCategoriesAndDescriptionsRows[i].roomCategoryDescription;
+
+      }
+
     } catch (error) {
 
       err = error;
@@ -1182,6 +1199,7 @@ router.get('/hotels/:id/rates/history', function(req, res, next) {
                 dates: dates,
                 roomTypeOptions: roomCategories,
                 roomTypeDescriptionOptions: roomCategoriesDescriptions,
+                roomTypeDescriptionMap: descriptionMap,
                 rates: rateInformation,
               },
               error: false,
@@ -1359,7 +1377,7 @@ router.put('/hotels/:id/rates/:rateId', function(req, res, next) {
   
         }
 
-        value = Number(roomTypeOptions[value]);console.log(value)
+        value = Number(roomTypeOptions[value]);
 
       }
       
@@ -1367,7 +1385,7 @@ router.put('/hotels/:id/rates/:rateId', function(req, res, next) {
 
     } catch (error) {
 
-      err = error;console.log(error)
+      err = error;
 
     } finally {
 
