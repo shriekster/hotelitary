@@ -131,6 +131,7 @@ export default function Rooms(props) {
 
     }
 
+    setSelectionModel([]);
     setOpenDialog(true);
     
   }
