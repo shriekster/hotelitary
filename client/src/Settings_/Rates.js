@@ -21,7 +21,7 @@ import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
-import DatePicker from '@mui/lab/DatePicker';
+import StaticDatePicker from '@mui/lab/StaticDatePicker';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import ro from 'date-fns/locale/ro';
 
@@ -371,6 +371,88 @@ export default function Rates(props) {
 
   const handleAddTable = () => {
 
+    setOpenOtherDialog(true);
+
+  }
+
+  const handleCancelTable = () => {
+
+    setDate(new Date());
+
+    setOpenOtherDialog(false);
+
+  }
+
+  const handleSaveTable = async () => {
+
+    let formattedDate = date.toLocaleDateString('ro-RO');
+
+    if (formattedDate !== 'Invalid Date') {
+
+      setLoading(true);
+
+      const requestOptions = {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          date: formattedDate
+        }),
+      };
+
+      const response = await fetch(`/api/hotels/1/rates`, requestOptions);
+      const json = await response.json();
+
+      setLoading(false);
+      setOpenOtherDialog(false);
+
+      if (response.ok && json && json.data && json.data.dates.length > 0) {
+        
+        const newExistingDates = [...existingDates];
+        newExistingDates.push(formattedDate);
+        setExistingDates((prevExistingDates) => [...newExistingDates]);
+        setSnackbar({ children: 'Adăugat!', severity: 'success' });
+
+      } else {
+
+        setSnackbar({ children: json.message, severity: 'error' });
+        setExistingDates((prevExistingDates) => [...prevExistingDates]);
+
+      }
+
+      queueMicrotask(() => {
+        setRowToAdd((prevRowToAdd) => ({
+          ...prevRowToAdd,
+          id: '',
+          index: '',
+          roomCategory: '',
+          roomCategoryDescription: '',
+          rate: '',
+        }));
+      });
+
+    } else {
+
+      setSnackbar({ children: 'Completează toate câmpurile!', severity: 'error' });
+
+    }
+
+  }
+
+  const handleCloseOtherDialog = (event, reason) => {
+    
+    if (!loading) {
+
+      setOpenOtherDialog(false);
+
+    } else {
+
+      event.preventDefault();
+
+    }
+    
   }
 
   useEffect(() => {// TODO!!
@@ -481,16 +563,6 @@ export default function Rates(props) {
               <AddBoxOutlinedIcon fontSize='large' />
             </IconButton>
           </Tooltip>
-          {/*
-          <LocalizationProvider dateAdapter={AdapterDateFns}
-            locale={ro}>
-              <DatePicker 
-                value={date}
-                onChange={(newDate) => { setDate(newDate) }}
-                renderInput={(params) => <TextField {...params} />}
-              />
-          </LocalizationProvider>
-          */}
         </div>
       </div>
       <DataGrid sx={{
@@ -610,6 +682,65 @@ export default function Rates(props) {
             <Button variant='contained'
               color='error'
               onClick={handleCancelRow}
+              disabled={loading}>
+              Renunță
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog fullWidth
+          maxWidth={false} 
+          onClose={handleCloseOtherDialog} 
+          open={openOtherDialog}>
+          <DialogTitle sx={{textAlign: 'center'}}>
+            Adaugă tarife valabile începând cu {date.toLocaleDateString('ro-RO')} (actualizare)
+          </DialogTitle>
+          <DialogContent sx={{
+            height: '50vh',
+            position: 'relative'
+          }}>
+            <LocalizationProvider dateAdapter={AdapterDateFns}
+              locale={ro}>
+                <StaticDatePicker
+                  displayStaticWrapperAs='desktop'
+                  openTo='day'
+                  views={['day']}
+                  value={date}
+                  onChange={(newDate) => { setDate(newDate) }}
+                  renderInput={(params) => <TextField {...params} />}
+                />
+            </LocalizationProvider>
+            {
+              loading &&
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                height: '50vh',
+                width: '100%',
+                background: 'rgba(128, 128, 128, 0.25)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <CircularProgress disableShrink/>
+              </div>
+            }
+          </DialogContent>
+          <DialogActions sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+            }}>
+            <Button autoFocus
+              variant='contained'
+              color='primary'
+              onClick={handleSaveTable}
+              disabled={loading}>
+              Salvează
+            </Button>
+            <Button variant='contained'
+              color='error'
+              onClick={handleCancelTable}
               disabled={loading}>
               Renunță
             </Button>

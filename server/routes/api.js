@@ -1164,6 +1164,62 @@ router.delete('/hotels/:id/rooms', function(req, res, next){
 /* POST (CREATE) a price update (a set of rates for a new, specified date) */
 router.post('/hotels/:id/rates', function(req, res, next) {
   
+  const hotelId = Number(req.params.id);
+  const { date } = req.body;
+  const formattedDate = date.toString().split('.').reverse().join('-');
+
+  const isValid = !isNaN(hotelId) && (hotelId > 0) && (new Date(formattedDate).toString() !== 'Invalid Date');
+
+  console.log(new Date(formattedDate).toString())
+
+  if (isValid) {
+
+    const insertRateUpdate = db.prepare(`
+      INSERT INTO ActualizariTarife(Data)
+      Values (?)`);
+
+    let err;
+
+    try {
+
+      insertRateUpdate.run(formattedDate);
+
+    } catch (error) {
+
+      err = error;
+
+    } finally {
+
+      if (!err) {
+
+        res.status(200).json({
+          data: null,
+          error: false,
+          message: 'Adăugat!',
+        });
+
+      } else {
+
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare: adăugare nereușită!'
+        });
+
+      }
+
+    }
+
+  } else {
+
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Eroare: adăugare nereușită!'
+    });
+
+  }
+
 });
 
 /* POST (CREATE) rates for an existing, specified date */
