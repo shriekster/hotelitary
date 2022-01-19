@@ -420,6 +420,7 @@ export default function Rates(props) {
         queueMicrotask( () => {
           if (newIndex >= 0 && newIndex <newExistingDates.length) {
             setSelectedDateIndex(newIndex);
+            setRows((prevRows) => ([]));
           }
         });
         setSnackbar({ children: 'Adăugat!', severity: 'success' });
@@ -452,9 +453,9 @@ export default function Rates(props) {
 
   const handleDeleteTable = async () => {
 
-    let formattedDate = date.toLocaleDateString('ro-RO');
+    const formattedDate = existingDates[selectedDateIndex].split('.').reverse().join('-');
 
-    if (formattedDate !== 'Invalid Date') {
+    if (new Date(formattedDate).toString() !== 'Invalid Date') {
 
       setLoading(true);
 
