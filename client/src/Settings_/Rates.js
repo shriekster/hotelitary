@@ -99,18 +99,32 @@ export default function Rates(props) {
         setExistingDates(newExistingDates);
         setRoomTypeOptions(newRoomTypeOptions);
         setRoomTypeDescriptionOptions(newRoomTypeDescriptionOptions);
+        setSelectedDateIndex(0);
 
         setRows((prevRows) => (newRows));
 
       } else {
 
-        setSnackbar({ children: json.message, severity: 'error' });
+        //setSnackbar({ children: json.message, severity: 'error' });
+        descriptionMap.current = null;
+        setExistingDates([]);
+        setRoomTypeOptions([]);
+        setRoomTypeDescriptionOptions([]);
+        setSelectedDateIndex(0);
+
+        setRows((prevRows) => ([]));
 
       }
 
     } else {
 
-      setSnackbar({ children: json.message, severity: 'error' });
+      //setSnackbar({ children: json.message, severity: 'error' });
+      descriptionMap.current = null;
+      setExistingDates([]);
+      setRoomTypeOptions([]);
+      setRoomTypeDescriptionOptions([]);
+
+      setRows((prevRows) => ([]));
 
     }
 
@@ -194,40 +208,44 @@ export default function Rates(props) {
 
   const handleAddRow = async () => {
 
-    let newId;
+    if (existingDates.length > 0 && selectedDateIndex >=0 && selectedDateIndex < existingDates.length) {
 
-    const requestOptions = {
-      method: 'GET',
-      mode: 'cors',
-    };
+      let newId;
 
-    const response = await fetch(`/api/hotels/1/rates/next-id`, requestOptions);
-    const json = await response.json();
+      const requestOptions = {
+        method: 'GET',
+        mode: 'cors',
+      };
+
+      const response = await fetch(`/api/hotels/1/rates/next-id`, requestOptions);
+      const json = await response.json();
+      
+      if (response.ok && json.data && json.data.nextId) {
+
+        newId = json.data.nextId;
+
+      } else {
+
+        newId = rows.length > 0 ? Math.max(...rows.map((row) => row.id)) + 1 : 1;
+
+      }
+
+      const newIndex = rows.length > 0 ? Math.max(...rows.map((row) => row.index)) + 1 : 1;
+
+      setRowToAdd((prevRowToAdd) => ({
+        ...prevRowToAdd,
+        id: newId,
+        index: newIndex,
+        roomCategory: '',
+        roomCategoryDescription: '',
+        rate: '',
+
+      }));
+
+      setOpenDialog(true);
     
-    if (response.ok && json.data && json.data.nextId) {
-
-      newId = json.data.nextId;
-
-    } else {
-
-      newId = rows.length > 0 ? Math.max(...rows.map((row) => row.id)) + 1 : 1;
-
     }
 
-    const newIndex = rows.length > 0 ? Math.max(...rows.map((row) => row.index)) + 1 : 1;
-
-    setRowToAdd((prevRowToAdd) => ({
-      ...prevRowToAdd,
-      id: newId,
-      index: newIndex,
-      roomCategory: '',
-      roomCategoryDescription: '',
-      rate: '',
-
-    }));
-
-    setOpenDialog(true);
-    
   }
 
   const handleNewCellEditCommit = (params) => {
@@ -532,14 +550,16 @@ export default function Rates(props) {
         });
         */
         setSnackbar({ children: json.message, severity: 'success' });
-        await fetchHistoryAndLatestRates();
+        //await fetchHistoryAndLatestRates();
 
       } else {
 
         setSnackbar({ children: json.message, severity: 'error' });
-        setExistingDates((prevExistingDates) => [...prevExistingDates]);
+        //setExistingDates((prevExistingDates) => [...prevExistingDates]);
 
       }
+
+      await fetchHistoryAndLatestRates();
 
       queueMicrotask(() => {
         setRowToAdd((prevRowToAdd) => ({
@@ -554,7 +574,7 @@ export default function Rates(props) {
 
     } else {
 
-      setSnackbar({ children: 'Completează toate câmpurile!', severity: 'error' });
+      setSnackbar({ children: 'Încearcă din nou!', severity: 'error' });
 
     }
 
@@ -703,7 +723,8 @@ export default function Rates(props) {
               placement='left'>
               <Fab color='primary' 
                 aria-label='adaugă'
-                onClick={handleAddRow}>
+                onClick={handleAddRow}
+                disabled={!existingDates.length}>
                 <AddIcon />
               </Fab>
             </Tooltip>

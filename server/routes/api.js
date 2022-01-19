@@ -1781,7 +1781,7 @@ router.delete('/hotels/:id/rate-set', function(req, res, next){
   const isValid = !isNaN(hotelId) && (new Date(formattedDate).toString() !== 'Invalid Date');
   
   if (isValid) {
-    console.log(formattedDate)
+    
     const deleteRateUpdate = db.prepare(`
       DELETE FROM ActualizariTarife
       WHERE Data = ?`);
