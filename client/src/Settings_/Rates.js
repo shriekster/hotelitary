@@ -478,8 +478,7 @@ export default function Rates(props) {
       if (response.ok) {
         
         const newExistingDates = [...existingDates];
-        newExistingDates.pop(formattedDate);
-        newExistingDates.sort().reverse();
+        newExistingDates.pop(existingDates[selectedDateIndex]);
         setExistingDates((prevExistingDates) => [...newExistingDates]);
         queueMicrotask( () => {
           //setSelectedDateIndex(0);
