@@ -17,6 +17,7 @@ import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -287,17 +288,8 @@ export default function Rates(props) {
           
         const newRows = rows.filter(row => !selectionModel.includes(row.id));
 
-        if (!newRows.length) {/////////TODO
-
-          setRows(newRows);
-          setSnackbar({ children: json.message, severity: 'success' });
-
-        } else {
-
-          setRows(newRows);
-          setSnackbar({ children: json.message, severity: 'success' });
-
-        }
+        setRows(newRows);
+        setSnackbar({ children: json.message, severity: 'success' });
 
       } else {
 
@@ -332,7 +324,7 @@ export default function Rates(props) {
   }
 
   const handleExistingDateChange = async (event, newValue) => {
-
+    
     const formattedDate = newValue.split('.').reverse().join('-');
 
     const index = existingDates.indexOf(newValue);
@@ -431,6 +423,67 @@ export default function Rates(props) {
           }
         });
         setSnackbar({ children: 'Adăugat!', severity: 'success' });
+
+      } else {
+
+        setSnackbar({ children: json.message, severity: 'error' });
+        setExistingDates((prevExistingDates) => [...prevExistingDates]);
+
+      }
+
+      queueMicrotask(() => {
+        setRowToAdd((prevRowToAdd) => ({
+          ...prevRowToAdd,
+          id: '',
+          index: '',
+          roomCategory: '',
+          roomCategoryDescription: '',
+          rate: '',
+        }));
+      });
+
+    } else {
+
+      setSnackbar({ children: 'Completează toate câmpurile!', severity: 'error' });
+
+    }
+
+  }
+
+  const handleDeleteTable = async () => {
+
+    let formattedDate = date.toLocaleDateString('ro-RO');
+
+    if (formattedDate !== 'Invalid Date') {
+
+      setLoading(true);
+
+      const requestOptions = {
+        method: 'DELETE',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          date: formattedDate
+        }),
+      };
+
+      const response = await fetch(`/api/hotels/1/rate-set`, requestOptions);
+      const json = await response.json();
+
+      setLoading(false);
+
+      if (response.ok) {
+        
+        const newExistingDates = [...existingDates];
+        newExistingDates.pop(formattedDate);
+        newExistingDates.sort().reverse();
+        setExistingDates((prevExistingDates) => [...newExistingDates]);
+        queueMicrotask( () => {
+          //setSelectedDateIndex(0);
+        });
+        setSnackbar({ children: json.message, severity: 'success' });
 
       } else {
 
@@ -570,7 +623,7 @@ export default function Rates(props) {
             sx={{ width: '300px', marginLeft: '8px'}}
             renderInput={(params) => <TextField {...params}/>}
           />
-          <Tooltip title={<Typography variant='body2'>Adaugă set de tarife (actualizare)</Typography>}
+          <Tooltip title={<Typography variant='body2'>Adaugă set de tarife (actualizează)</Typography>}
             arrow={true}
             placement='right'>
             <IconButton sx={{
@@ -581,6 +634,15 @@ export default function Rates(props) {
             </IconButton>
           </Tooltip>
         </div>
+        <Tooltip title={<Typography variant='body2'>Șterge setul de tarife (actualizarea)</Typography>}
+            arrow={true}
+            placement='left'>
+            <IconButton color='error'
+              onClick={handleDeleteTable}
+              disabled={rows.length !== 0}>
+              <DeleteSweepIcon fontSize='large' />
+            </IconButton>
+        </Tooltip>
       </div>
       <DataGrid sx={{
           width: '100%',

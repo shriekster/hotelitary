@@ -1772,28 +1772,30 @@ router.delete('/hotels/:id/rates', function(req, res, next){
 
 });
 
-/* DELETE a set of rates (if the set is empty) */
-router.delete('/hotels/:id/rates', function(req, res, next){/////////TODO!
+/* DELETE a set of rates (an update series) */
+router.delete('/hotels/:id/rate-set', function(req, res, next){
 
   const hotelId = Number(req.params.id);
-  const { date } = req.body;///FINISH VALIDATION
-  const isValid = !isNaN(hotelId) && 1;
-
+  const { date } = req.body;
+  const formattedDate = date.split('.').reverse().join('-');
+  const isValid = !isNaN(hotelId) && (new Date(formattedDate).toString() !== 'Invalid Date');
+  
   if (isValid) {
 
     const deleteRateUpdate = db.prepare(`
       DELETE FROM ActualizariTarife
       WHERE Data = ?`);
 
-    let err;
+    let err, info;
 
     try {
 
-      deleteRateUpdate.run(date);
+      info = deleteRateUpdate.run(formattedDate.toString());
+      console.log(info)
 
     } catch (error) {
 
-      err = error;
+      err = error;console.log(err)
 
     } finally {
 
