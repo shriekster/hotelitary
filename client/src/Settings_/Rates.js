@@ -71,7 +71,7 @@ export default function Rates(props) {
   });
 
    const fetchHistoryAndLatestRates = async () => {
-  
+  // MUST FIX BUG
     const requestOptions = {
       method: 'GET',
       mode: 'cors',
