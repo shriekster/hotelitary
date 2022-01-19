@@ -1791,11 +1791,10 @@ router.delete('/hotels/:id/rate-set', function(req, res, next){
     try {
 
       info = deleteRateUpdate.run(formattedDate.toString());
-      console.log(info)
 
     } catch (error) {
 
-      err = error;console.log(err)
+      err = error;
 
     } finally {
 
