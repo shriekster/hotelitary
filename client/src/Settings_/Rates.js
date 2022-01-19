@@ -54,9 +54,11 @@ export default function Rates(props) {
 
   const [date, setDate] = useState(new Date());
 
-  const [existingDates, setExistingDates] = useState(['--.--.----']);
+  const [existingDates, setExistingDates] = useState([]);
 
   const [selectedDateIndex, setSelectedDateIndex] = useState(0);
+
+  const [selectedDate, setSelectedDate] = useState('');
 
   const [openOtherDialog, setOpenOtherDialog] = useState(false);////////////
 
@@ -100,6 +102,7 @@ export default function Rates(props) {
         setRoomTypeOptions(newRoomTypeOptions);
         setRoomTypeDescriptionOptions(newRoomTypeDescriptionOptions);
         setSelectedDateIndex(0);
+        setSelectedDate(newExistingDates[0])
 
         setRows((prevRows) => (newRows));
 
@@ -397,6 +400,7 @@ export default function Rates(props) {
       
       setLoading(true);
       setSelectedDateIndex(index);
+      setSelectedDate(newValue);
   
       const requestOptions = {
         method: 'GET',
@@ -637,7 +641,8 @@ export default function Rates(props) {
           </Typography>
           <Autocomplete
             disableClearable
-            value={existingDates[selectedDateIndex]}
+            //value={existingDates[selectedDateIndex]}
+            value={selectedDate}
             onChange={handleExistingDateChange}
             id='existingDates'
             options={existingDates}
@@ -662,7 +667,7 @@ export default function Rates(props) {
             placement='left'>
             <IconButton color='error'
               onClick={handleDeleteTable}
-              disabled={rows.length !== 0}>
+              disabled={rows.length !== 0 && existingDates.length !== 0}>
               <DeleteSweepIcon fontSize='large' />
             </IconButton>
         </Tooltip>
