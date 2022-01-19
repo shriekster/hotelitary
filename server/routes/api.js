@@ -1160,8 +1160,13 @@ router.delete('/hotels/:id/rooms', function(req, res, next){
 
 });
 
-/* POST (CREATE) RATES */
+/* POST (CREATE) a price update (a set of rates for a new, specified date) */
 router.post('/hotels/:id/rates', function(req, res, next) {
+  
+});
+
+/* POST (CREATE) rates for an existing, specified date */
+router.post('/hotels/:id/rates/:date', function(req, res, next) {
   
 });
 
