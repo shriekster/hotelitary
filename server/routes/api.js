@@ -1160,6 +1160,11 @@ router.delete('/hotels/:id/rooms', function(req, res, next){
 
 });
 
+/* POST (CREATE) RATES */
+router.post('/hotels/:id/rates', function(req, res, next) {
+  
+});
+
 /* GET (READ) rates history (dates), latest rates AND room (categories) description mapping */
 router.get('/hotels/:id/rates/history', function(req, res, next) {
 
