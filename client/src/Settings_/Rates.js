@@ -145,9 +145,28 @@ export default function Rates(props) {
 
   }
 
-  const handleAddRow = () => {
+  const handleAddRow = async () => {
 
-    const newId = rows.length > 0 ? Math.max(...rows.map((row) => row.id)) + 1 : 1;
+    let newId;
+
+    const requestOptions = {
+      method: 'GET',
+      mode: 'cors',
+    };
+
+    const response = await fetch(`/api/hotels/1/rates/next-id`, requestOptions);
+    const json = await response.json();
+    
+    if (response.ok && json.data && json.data.nextId) {
+
+      newId = json.data.nextId;
+
+    } else {
+
+      newId = rows.length > 0 ? Math.max(...rows.map((row) => row.id)) + 1 : 1;
+
+    }
+
     const newIndex = rows.length > 0 ? Math.max(...rows.map((row) => row.index)) + 1 : 1;
 
     setRowToAdd((prevRowToAdd) => ({
@@ -203,7 +222,7 @@ export default function Rates(props) {
         body: JSON.stringify(rowToAdd),
       };
 
-      const response = await fetch(`/api/hotels/1/rates`, requestOptions);
+      const response = await fetch(`/api/hotels/1/rates/${existingDates[selectedDateIndex]}`, requestOptions);
       const json = await response.json();
 
       setLoading(false);

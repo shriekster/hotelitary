@@ -928,7 +928,7 @@ router.post('/hotels/:id/rooms', function(req, res, next) {
 
   const hotelId = Number(req.params.id);
 
-  let { id, floor, number, roomType, status } = req.body;console.log(req.body)
+  let { id, floor, number, roomType, status } = req.body;
 
   const isValid = !isNaN(Number(id)) && !!Number(id) && !!floor && !!number && !!roomType && !!status;
 
@@ -1081,6 +1081,7 @@ router.post('/hotels/:id/rooms', function(req, res, next) {
     }
 
   } else {
+
     res.status(404).json({
       data: null,
       error: true,
@@ -1167,7 +1168,149 @@ router.post('/hotels/:id/rates', function(req, res, next) {
 
 /* POST (CREATE) rates for an existing, specified date */
 router.post('/hotels/:id/rates/:date', function(req, res, next) {
-  
+
+  const hotelId = Number(req.params.id);
+  const date = req.params.date.split('.').reverse().join('-');
+
+  let { id, index, roomCategory, roomCategoryDescription, rate } = req.body;
+
+  const isValidDate = new Date(date).toString() !== 'Invalid Date';
+
+  const isValid = !isNaN(Number(id)) && !!Number(id) && isValidDate && !isNaN(Number(index)) && !!Number(index) && !!roomCategory && !!rate;
+
+  if (!isNaN(hotelId) && isValid) {
+
+    const selectUpdateId = db.prepare(`
+      SELECT
+        ID AS id
+      FROM ActualizariTarife
+      WHERE Data = ?`);
+
+    const selectRoomTypeId = db.prepare(`
+      SELECT
+        ID AS id
+      FROM TipuriModul
+      WHERE Denumire = ?`);
+
+    const insertRate = db.prepare(`
+      INSERT INTO Tarife(ID, ActualizareID, NumarCurent, TipModulID, Valoare)
+      VALUES (?, ?, ?, ?, ?)`);
+
+    let update, roomType, err;
+
+    try {
+
+      update = selectUpdateId.get(date);
+
+      roomType = selectRoomTypeId.get(roomCategory);
+
+      insertRate.run(
+        Number(id),
+        Number(update.id),
+        Number(index),
+        Number(roomType.id),
+        Number(rate)
+      );
+
+    } catch (error) {
+
+      err = error;console.log(error)
+
+    } finally {
+
+      if (!err) {
+
+        res.status(200).json({
+          data: null,
+          error: false,
+          message: 'Adăugat!',
+        });
+
+      } else {
+
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare: adăugare nereușită!'
+        });
+
+      }
+
+    }
+
+  } else {
+    
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Eroare: adăugare nereușită!'
+    });
+
+  }
+
+});
+
+/* GET the next rate ID - necessary for rate creation (otherwise a database UNIQUE constraint fails) */
+router.get('/hotels/:id/rates/next-id', function (req, res, next) {
+
+  const hotelId = Number(req.params.id);
+
+  if (!isNaN(hotelId)) {
+
+    const selectNextId = db.prepare(`SELECT max(ID) + 1 AS nextId FROM Tarife`);
+
+    let err, data;
+
+    try {
+
+      data = selectNextId.get();
+
+      if (!data) {
+
+        data = {
+          nextId: 1,
+        };
+
+      }
+
+    } catch (error) {
+
+      err = error;
+
+    } finally {
+
+      if (!err) {
+
+        res.status(200).json({
+          data: {
+            nextId: data.nextId
+          },
+          error: false,
+          message: 'Succes!',
+        });
+
+      } else {
+
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare la procedura de adăugare a tarifului!'
+        });
+
+      }
+
+    }
+
+  } else {
+    
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Eroare la procedura de adăugare a tarifului!'
+    });
+
+  }
+
 });
 
 /* GET (READ) rates history (dates), latest rates AND room (categories) description mapping */
