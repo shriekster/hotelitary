@@ -70,6 +70,52 @@ export default function Rates(props) {
     rate: '',
   });
 
+   const fetchHistoryAndLatestRates = async () => {
+  
+    const requestOptions = {
+      method: 'GET',
+      mode: 'cors',
+    };
+
+    const response = await fetch('/api/hotels/1/rates/history', requestOptions);
+
+    const json = await response.json();
+
+    setLoading(false);
+
+    if (response.ok) {
+
+      if (!json.error) {
+
+        const data = json.data;
+
+        const newExistingDates = [...data.dates];
+        const newRoomTypeOptions = [...data.roomTypeOptions];
+        const newRoomTypeDescriptionOptions = [...data.roomTypeDescriptionOptions];
+        const newRows = [...data.rates];
+
+        descriptionMap.current = data.roomTypeDescriptionMap;
+
+        setExistingDates(newExistingDates);
+        setRoomTypeOptions(newRoomTypeOptions);
+        setRoomTypeDescriptionOptions(newRoomTypeDescriptionOptions);
+
+        setRows((prevRows) => (newRows));
+
+      } else {
+
+        setSnackbar({ children: json.message, severity: 'error' });
+
+      }
+
+    } else {
+
+      setSnackbar({ children: json.message, severity: 'error' });
+
+    }
+
+  }
+
   const handleCloseSnackbar = () => {
     setSnackbar(null);
   }
@@ -477,13 +523,16 @@ export default function Rates(props) {
 
       if (response.ok) {
         
+        /*
         const newExistingDates = [...existingDates];
         newExistingDates.pop(existingDates[selectedDateIndex]);
         setExistingDates((prevExistingDates) => [...newExistingDates]);
         queueMicrotask( () => {
           //setSelectedDateIndex(0);
         });
+        */
         setSnackbar({ children: json.message, severity: 'success' });
+        await fetchHistoryAndLatestRates();
 
       } else {
 
@@ -525,53 +574,7 @@ export default function Rates(props) {
     
   }
 
-  useEffect(() => {// TODO!!
-
-    async function fetchHistoryAndLatestRates() {
-  
-      const requestOptions = {
-        method: 'GET',
-        mode: 'cors',
-      };
-  
-      const response = await fetch('/api/hotels/1/rates/history', requestOptions);
-
-      const json = await response.json();
-
-      setLoading(false);
-
-      if (response.ok) {
-
-        if (!json.error) {
-
-          const data = json.data;
-
-          const newExistingDates = [...data.dates];
-          const newRoomTypeOptions = [...data.roomTypeOptions];
-          const newRoomTypeDescriptionOptions = [...data.roomTypeDescriptionOptions];
-          const newRows = [...data.rates];
-
-          descriptionMap.current = data.roomTypeDescriptionMap;
-
-          setExistingDates(newExistingDates);
-          setRoomTypeOptions(newRoomTypeOptions);
-          setRoomTypeDescriptionOptions(newRoomTypeDescriptionOptions);
-  
-          setRows((prevRows) => (newRows));
-
-        } else {
-
-          setSnackbar({ children: json.message, severity: 'error' });
-
-        }
-
-      } else {
-
-        setSnackbar({ children: json.message, severity: 'error' });
-
-      }
-  
-    }
+  useEffect(() => {
 
     fetchHistoryAndLatestRates();
   
