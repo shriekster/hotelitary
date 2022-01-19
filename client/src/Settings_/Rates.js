@@ -286,8 +286,18 @@ export default function Rates(props) {
       if (response.ok) {
           
         const newRows = rows.filter(row => !selectionModel.includes(row.id));
-        setRows(newRows);
-        setSnackbar({ children: json.message, severity: 'success' });
+
+        if (!newRows.length) {/////////TODO
+
+          setRows(newRows);
+          setSnackbar({ children: json.message, severity: 'success' });
+
+        } else {
+
+          setRows(newRows);
+          setSnackbar({ children: json.message, severity: 'success' });
+
+        }
 
       } else {
 
@@ -408,11 +418,18 @@ export default function Rates(props) {
       setLoading(false);
       setOpenOtherDialog(false);
 
-      if (response.ok && json && json.data && json.data.dates.length > 0) {
+      if (response.ok) {
         
         const newExistingDates = [...existingDates];
         newExistingDates.push(formattedDate);
+        newExistingDates.sort().reverse();
+        const newIndex = newExistingDates.indexOf(formattedDate);
         setExistingDates((prevExistingDates) => [...newExistingDates]);
+        queueMicrotask( () => {
+          if (newIndex >= 0 && newIndex <newExistingDates.length) {
+            setSelectedDateIndex(newIndex);
+          }
+        });
         setSnackbar({ children: 'Adăugat!', severity: 'success' });
 
       } else {

@@ -1772,6 +1772,63 @@ router.delete('/hotels/:id/rates', function(req, res, next){
 
 });
 
+/* DELETE a set of rates (if the set is empty) */
+router.delete('/hotels/:id/rates', function(req, res, next){/////////TODO!
+
+  const hotelId = Number(req.params.id);
+  const { date } = req.body;///FINISH VALIDATION
+  const isValid = !isNaN(hotelId) && 1;
+
+  if (isValid) {
+
+    const deleteRateUpdate = db.prepare(`
+      DELETE FROM ActualizariTarife
+      WHERE Data = ?`);
+
+    let err;
+
+    try {
+
+      deleteRateUpdate.run(date);
+
+    } catch (error) {
+
+      err = error;
+
+    } finally {
+
+      if (!err) {
+
+        res.status(200).json({
+          data: null,
+          error: false,
+          message: 'Șters(e)!'
+        });
+
+      } else {
+
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare: ștergere nereușită!'
+        });
+
+      }
+
+    }
+
+  } else {
+
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Eroare: ștergere nereușită!'
+    });
+
+  }
+
+});
+
 
 /* Final route: handler for all the incorrect / invalid requests */
 router.all('*', function(req, res, next) {
