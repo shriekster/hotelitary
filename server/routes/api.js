@@ -1707,10 +1707,17 @@ router.put('/hotels/:id/rates/:rateId', function(req, res, next) {
 router.delete('/hotels/:id/rates', function(req, res, next){
 
   const hotelId = Number(req.params.id);
-  const { ids } = req.body;
-  const isValid = ids.every(id => id > 0);
+  const { ids, date, deleteParent } = req.body;
+  const validHotelId = !isNaN(hotelId) && hotelId > 0;
+  const validIds = (ids.length > 0 && ids.every(id => id > 0)) || ids.length === 0;
+  const validDate = new Date(date.split('.').reverse().join('-')) !== 'Invalid Date';
+  const isValid = validHotelId && validIds && validDate && deleteParent !== undefined;
 
-  if (!isNaN(hotelId) && !!ids && ids.length > 0 && isValid) {
+  if (isValid) {
+
+    const deleteUpdate = db.prepare(`
+      DELETE FROM ActualizariTarife
+      WHERE Data = ?`);
 
     const deleteRate = db.prepare(`
       DELETE FROM Tarife
@@ -1734,6 +1741,13 @@ router.delete('/hotels/:id/rates', function(req, res, next){
 
       deleteRates(ids);
 
+      if (deleteParent) {
+
+        const formattedDate = date.split('.').reverse().join('-');
+        deleteUpdate.run(formattedDate);
+
+      }
+
     } catch (error) {
 
       err = error;
@@ -1743,7 +1757,9 @@ router.delete('/hotels/:id/rates', function(req, res, next){
       if (!err) {
 
         res.status(200).json({
-          data: null,
+          data: {
+            parentDeleted: deleteParent,
+          },
           error: false,
           message: 'Șters(e)!'
         });
@@ -1771,65 +1787,6 @@ router.delete('/hotels/:id/rates', function(req, res, next){
   }
 
 });
-
-/* DELETE a set of rates (an update series) */
-router.delete('/hotels/:id/rate-set', function(req, res, next){
-
-  const hotelId = Number(req.params.id);
-  const { date } = req.body;
-  const formattedDate = date.split('.').reverse().join('-');
-  const isValid = !isNaN(hotelId) && (new Date(formattedDate).toString() !== 'Invalid Date');
-  
-  if (isValid) {
-    
-    const deleteRateUpdate = db.prepare(`
-      DELETE FROM ActualizariTarife
-      WHERE Data = ?`);
-
-    let err, info;
-
-    try {
-
-      info = deleteRateUpdate.run(formattedDate.toString());
-
-    } catch (error) {
-
-      err = error;
-
-    } finally {
-
-      if (!err) {
-
-        res.status(200).json({
-          data: null,
-          error: false,
-          message: 'Șters(e)!'
-        });
-
-      } else {
-
-        res.status(404).json({
-          data: null,
-          error: true,
-          message: 'Eroare: ștergere nereușită!'
-        });
-
-      }
-
-    }
-
-  } else {
-
-    res.status(404).json({
-      data: null,
-      error: true,
-      message: 'Eroare: ștergere nereușită!'
-    });
-
-  }
-
-});
-
 
 /* Final route: handler for all the incorrect / invalid requests */
 router.all('*', function(req, res, next) {

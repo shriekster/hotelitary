@@ -59,3 +59,7 @@ html {
   .Settings-attribute-cell {
     font-weight: 700;
   }
+
+  .MuiTooltip-tooltip {
+    max-width: none !important;
+  }

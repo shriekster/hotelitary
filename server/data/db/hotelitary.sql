@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.3.3 on Wed Jan 19 03:51:34 2022
+-- File generated with SQLiteStudio v3.3.3 on joi ian. 20 11:17:11 2022
 --
 -- Text encoding used: UTF-8
 --
@@ -8,10 +8,8 @@ BEGIN TRANSACTION;
 
 -- Table: ActualizariTarife
 CREATE TABLE ActualizariTarife (ID INTEGER PRIMARY KEY, Data TEXT);
-INSERT INTO ActualizariTarife (ID, Data) VALUES (1, '2022-01-01');
-INSERT INTO ActualizariTarife (ID, Data) VALUES (2, '2021-12-12');
-INSERT INTO ActualizariTarife (ID, Data) VALUES (3, '2022-01-19');
-INSERT INTO ActualizariTarife (ID, Data) VALUES (4, '2022-01-20');
+INSERT INTO ActualizariTarife (ID, Data) VALUES (1, '2022-01-20');
+INSERT INTO ActualizariTarife (ID, Data) VALUES (2, '2022-01-21');
 
 -- Table: Confort
 CREATE TABLE Confort (ID INTEGER PRIMARY KEY, Denumire TEXT);
@@ -57,13 +55,6 @@ INSERT INTO Spatii (ID, EtajID, Numar, TipModulID, Status) VALUES (1, 1, '1', 1,
 
 -- Table: Tarife
 CREATE TABLE Tarife (ID INTEGER PRIMARY KEY, ActualizareID INTEGER REFERENCES ActualizariTarife (ID) ON DELETE RESTRICT ON UPDATE CASCADE, NumarCurent INTEGER, TipModulID INTEGER REFERENCES TipuriModul (ID) ON DELETE RESTRICT ON UPDATE CASCADE, Valoare REAL);
-INSERT INTO Tarife (ID, ActualizareID, NumarCurent, TipModulID, Valoare) VALUES (1, 1, 1, 1, 39.0);
-INSERT INTO Tarife (ID, ActualizareID, NumarCurent, TipModulID, Valoare) VALUES (2, 1, 2, 2, 66.0);
-INSERT INTO Tarife (ID, ActualizareID, NumarCurent, TipModulID, Valoare) VALUES (3, 1, 3, 5, 118.0);
-INSERT INTO Tarife (ID, ActualizareID, NumarCurent, TipModulID, Valoare) VALUES (4, 2, 1, 1, 29.0);
-INSERT INTO Tarife (ID, ActualizareID, NumarCurent, TipModulID, Valoare) VALUES (5, 2, 2, 2, 56.0);
-INSERT INTO Tarife (ID, ActualizareID, NumarCurent, TipModulID, Valoare) VALUES (6, 2, 3, 5, 108.0);
-INSERT INTO Tarife (ID, ActualizareID, NumarCurent, TipModulID, Valoare) VALUES (7, 1, 4, 3, 123.0);
 
 -- Table: TipuriModul
 CREATE TABLE TipuriModul (ID INTEGER PRIMARY KEY, ModulID INTEGER REFERENCES Module (ID) ON DELETE RESTRICT ON UPDATE CASCADE, Paturi INTEGER, PatID INTEGER REFERENCES Paturi (ID) ON DELETE RESTRICT ON UPDATE CASCADE, ConfortID INTEGER REFERENCES Confort (ID) ON DELETE RESTRICT ON UPDATE CASCADE, Denumire TEXT);
@@ -73,7 +64,7 @@ INSERT INTO TipuriModul (ID, ModulID, Paturi, PatID, ConfortID, Denumire) VALUES
 INSERT INTO TipuriModul (ID, ModulID, Paturi, PatID, ConfortID, Denumire) VALUES (5, 3, 1, 2, 1, 'Apartament cu 2 locuri (pat dublu)');
 
 -- Table: Turisti
-CREATE TABLE Turisti (ID INTEGER PRIMARY KEY, CNP TEXT, Nume TEXT, Prenume TEXT, Grad TEXT, Institutie TEXT, NumarDocumentMilitar TEXT, SerieNumarCI TEXT);
+CREATE TABLE Turisti (ID INTEGER PRIMARY KEY, CNP TEXT, Nume TEXT, Prenume TEXT, Grad TEXT, Institutie TEXT, NumarDocumentMilitar TEXT, SerieNumarCI TEXT, Nationalitate INTEGER);
 
 -- Table: Unitati
 CREATE TABLE Unitati (ID INTEGER PRIMARY KEY, Tip TEXT, Judet TEXT, Localitate TEXT, Strada TEXT, Numar TEXT, CodPostal TEXT, Telefon TEXT, Fax TEXT, Email TEXT, Website TEXT);

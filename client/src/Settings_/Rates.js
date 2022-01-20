@@ -56,7 +56,7 @@ export default function Rates(props) {
 
   const [existingDates, setExistingDates] = useState([]);
 
-  const [selectedDateIndex, setSelectedDateIndex] = useState(0);
+  //const [selectedDateIndex, setSelectedDateIndex] = useState(0);
 
   const [selectedDate, setSelectedDate] = useState('');
 
@@ -101,7 +101,7 @@ export default function Rates(props) {
         setExistingDates(newExistingDates);
         setRoomTypeOptions(newRoomTypeOptions);
         setRoomTypeDescriptionOptions(newRoomTypeDescriptionOptions);
-        setSelectedDateIndex(0);
+        //setSelectedDateIndex(0);
         setSelectedDate(newExistingDates[0])
 
         setRows((prevRows) => (newRows));
@@ -113,7 +113,7 @@ export default function Rates(props) {
         setExistingDates([]);
         setRoomTypeOptions([]);
         setRoomTypeDescriptionOptions([]);
-        setSelectedDateIndex(0);
+        //setSelectedDateIndex(0);
 
         setRows((prevRows) => ([]));
 
@@ -211,7 +211,7 @@ export default function Rates(props) {
 
   const handleAddRow = async () => {
 
-    if (existingDates.length > 0 && selectedDateIndex >=0 && selectedDateIndex < existingDates.length) {
+    if (existingDates.length > 0 && existingDates.includes(selectedDate)) {
 
       let newId;
 
@@ -290,7 +290,7 @@ export default function Rates(props) {
         body: JSON.stringify(rowToAdd),
       };
 
-      const response = await fetch(`/api/hotels/1/rates/${existingDates[selectedDateIndex]}`, requestOptions);
+      const response = await fetch(`/api/hotels/1/rates/${selectedDate}`, requestOptions);
       const json = await response.json();
 
       setLoading(false);
@@ -335,16 +335,39 @@ export default function Rates(props) {
 
       setLoading(true);
 
-      const requestOptions = {
-        method: 'DELETE',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ids: selectionModel,
-        }),
-      };
+      let requestOptions;
+
+      if (selectionModel.length === rows.length) {
+
+        requestOptions = {
+          method: 'DELETE',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            date: selectedDate,
+            ids: selectionModel,
+            deleteParent: true,
+          }),
+        };
+
+      } else {
+
+        requestOptions = {
+          method: 'DELETE',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            date: selectedDate,
+            ids: selectionModel,
+            deleteParent: false,
+          }),
+        };
+
+      }
 
       const response = await fetch('/api/hotels/1/rates', requestOptions);
       const json = await response.json();
@@ -352,11 +375,21 @@ export default function Rates(props) {
       setLoading(false);
 
       if (response.ok) {
-          
-        const newRows = rows.filter(row => !selectionModel.includes(row.id));
 
-        setRows(newRows);
-        setSnackbar({ children: json.message, severity: 'success' });
+        if (json.data.parentDeleted) {
+
+          setSnackbar({ children: `Tarifele din ${selectedDate} au fost șterse!`, severity: 'success' });
+
+          await fetchHistoryAndLatestRates();
+
+        } else {
+
+          const newRows = rows.filter(row => !selectionModel.includes(row.id));
+
+          setRows(newRows);
+          setSnackbar({ children: json.message, severity: 'success' });
+
+        }
 
       } else {
 
@@ -369,7 +402,7 @@ export default function Rates(props) {
 
   }
 
-  const handleCancelRow = () => {
+  const handleCancelRow = async () => {
 
     setRowToAdd((prevRowToAdd) => ({
       ...prevRowToAdd,
@@ -381,6 +414,55 @@ export default function Rates(props) {
     }));
 
     setOpenDialog(false);
+
+    if (rows.length === 0) {
+
+      setLoading(true);
+
+      const requestOptions = {
+        method: 'DELETE',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          date: selectedDate,
+          ids: [],
+          deleteParent: true,
+        }),
+      };
+
+      const response = await fetch('/api/hotels/1/rates', requestOptions);
+      const json = await response.json();
+
+      setLoading(false);
+
+      if (response.ok) {
+
+        if (json.data.parentDeleted) {
+
+          setSnackbar({ children: `Adaugă cel puțin un tarif!`, severity: 'warning' });
+
+        } else {
+
+          setSnackbar({ children: 'Eroare la adăugare!', severity: 'error' });
+
+        }
+
+        //await fetchHistoryAndLatestRates();
+
+      } else {
+
+        setSnackbar({ children: 'Eroare la adăugare!', severity: 'error' });
+        //setRows((prevRows) => [...prevRows]);
+
+      }
+
+      setSelectedDate('');
+
+      await fetchHistoryAndLatestRates();
+
+    }
 
   }
 
@@ -399,7 +481,7 @@ export default function Rates(props) {
     if (index >= 0 && index < existingDates.length) {
       
       setLoading(true);
-      setSelectedDateIndex(index);
+      //setSelectedDateIndex(index);
       setSelectedDate(newValue);
   
       const requestOptions = {
@@ -483,15 +565,56 @@ export default function Rates(props) {
         const newExistingDates = [...existingDates];
         newExistingDates.push(formattedDate);
         newExistingDates.sort().reverse();
-        const newIndex = newExistingDates.indexOf(formattedDate);
+        //const newIndex = newExistingDates.indexOf(formattedDate);
         setExistingDates((prevExistingDates) => [...newExistingDates]);
-        queueMicrotask( () => {
-          if (newIndex >= 0 && newIndex <newExistingDates.length) {
-            setSelectedDateIndex(newIndex);
-            setRows((prevRows) => ([]));
+        setSelectedDate(formattedDate);
+        queueMicrotask( async () => {
+          console.log(existingDates, formattedDate)
+          //if (existingDates.includes(formattedDate)) {
+            //setSelectedDateIndex(newIndex);
+            //setSelectedDate(formattedDate);
+          //}
+
+          setRows((prevRows) => ([]));
+          //setSnackbar({ children: 'Adăugat!', severity: 'success' });
+
+          // add at least a room rate
+          let newId;
+
+          const idRequestOptions = {
+            method: 'GET',
+            mode: 'cors',
+          };
+    
+          const response = await fetch(`/api/hotels/1/rates/next-id`, idRequestOptions);
+          const json = await response.json();
+          
+          if (response.ok && json.data && json.data.nextId) {
+    
+            newId = json.data.nextId;
+    
+          } else {
+    
+            newId = rows.length > 0 ? Math.max(...rows.map((row) => row.id)) + 1 : 1;
+    
           }
+    
+          const newIndex = rows.length > 0 ? Math.max(...rows.map((row) => row.index)) + 1 : 1;
+    
+          setRowToAdd((prevRowToAdd) => ({
+            ...prevRowToAdd,
+            id: newId,
+            index: newIndex,
+            roomCategory: '',
+            roomCategoryDescription: '',
+            rate: '',
+    
+          }));
+
+          setOpenDialog(true);
+
         });
-        setSnackbar({ children: 'Adăugat!', severity: 'success' });
+        
 
       } else {
 
@@ -500,6 +623,7 @@ export default function Rates(props) {
 
       }
 
+      /*
       queueMicrotask(() => {
         setRowToAdd((prevRowToAdd) => ({
           ...prevRowToAdd,
@@ -510,75 +634,11 @@ export default function Rates(props) {
           rate: '',
         }));
       });
+      */
 
     } else {
 
       setSnackbar({ children: 'Completează toate câmpurile!', severity: 'error' });
-
-    }
-
-  }
-
-  const handleDeleteTable = async () => {
-
-    const formattedDate = existingDates[selectedDateIndex].split('.').reverse().join('-');
-
-    if (new Date(formattedDate).toString() !== 'Invalid Date') {
-
-      setLoading(true);
-
-      const requestOptions = {
-        method: 'DELETE',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          date: formattedDate
-        }),
-      };
-
-      const response = await fetch(`/api/hotels/1/rate-set`, requestOptions);
-      const json = await response.json();
-
-      setLoading(false);
-
-      if (response.ok) {
-        
-        /*
-        const newExistingDates = [...existingDates];
-        newExistingDates.pop(existingDates[selectedDateIndex]);
-        setExistingDates((prevExistingDates) => [...newExistingDates]);
-        queueMicrotask( () => {
-          //setSelectedDateIndex(0);
-        });
-        */
-        setSnackbar({ children: json.message, severity: 'success' });
-        //await fetchHistoryAndLatestRates();
-
-      } else {
-
-        setSnackbar({ children: json.message, severity: 'error' });
-        //setExistingDates((prevExistingDates) => [...prevExistingDates]);
-
-      }
-
-      await fetchHistoryAndLatestRates();
-
-      queueMicrotask(() => {
-        setRowToAdd((prevRowToAdd) => ({
-          ...prevRowToAdd,
-          id: '',
-          index: '',
-          roomCategory: '',
-          roomCategoryDescription: '',
-          rate: '',
-        }));
-      });
-
-    } else {
-
-      setSnackbar({ children: 'Încearcă din nou!', severity: 'error' });
 
     }
 
@@ -662,15 +722,6 @@ export default function Rates(props) {
             </IconButton>
           </Tooltip>
         </div>
-        <Tooltip title={<Typography variant='body2'>Șterge setul de tarife (actualizarea)</Typography>}
-            arrow={true}
-            placement='left'>
-            <IconButton color='error'
-              onClick={handleDeleteTable}
-              disabled={rows.length !== 0 && existingDates.length !== 0}>
-              <DeleteSweepIcon fontSize='large' />
-            </IconButton>
-        </Tooltip>
       </div>
       <DataGrid sx={{
           width: '100%',
@@ -723,15 +774,19 @@ export default function Rates(props) {
               </IconButton>
               </span>
             </Tooltip>
-            <Tooltip title={<Typography variant='body2'>Adaugă un tarif la data selectată</Typography>}
+            <Tooltip title={<Typography variant='body2'>{existingDates.length ? 
+              `Adaugă un tarif valabil din ${selectedDate}` : 
+              `Adaugă`}</Typography>}
               arrow={true}
               placement='left'>
+              <span>
               <Fab color='primary' 
                 aria-label='adaugă'
                 onClick={handleAddRow}
                 disabled={!existingDates.length}>
                 <AddIcon />
               </Fab>
+              </span>
             </Tooltip>
         </div>
         <Dialog fullWidth
@@ -739,7 +794,7 @@ export default function Rates(props) {
           onClose={handleCloseDialog} 
           open={openDialog}>
           <DialogTitle sx={{textAlign: 'center'}}>
-            Adaugă un tarif valabil începând cu {existingDates[selectedDateIndex]}
+            Adaugă un tarif valabil din {selectedDate}
           </DialogTitle>
           <DialogContent sx={{
             height: '50vh',
@@ -795,12 +850,12 @@ export default function Rates(props) {
             </Button>
           </DialogActions>
         </Dialog>
-        <Dialog fullWidth
+        <Dialog 
           maxWidth={false} 
           onClose={handleCloseOtherDialog} 
           open={openOtherDialog}>
           <DialogTitle sx={{textAlign: 'center'}}>
-            Adaugă tarife valabile începând cu {date.toLocaleDateString('ro-RO')} (actualizare)
+            Actualizare valabilă începând cu {date.toLocaleDateString('ro-RO')}
           </DialogTitle>
           <DialogContent sx={{
             height: '50vh',
