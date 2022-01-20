@@ -1461,7 +1461,7 @@ router.get('/hotels/:id/rates/history', function(req, res, next) {
 
     } catch (error) {
 
-      err = error;console.log(err)
+      err = error;
 
     } finally {
 
@@ -1481,7 +1481,7 @@ router.get('/hotels/:id/rates/history', function(req, res, next) {
 
         } catch (error) {
 
-          err = error;console.log(err)
+          err = error;
 
         } finally {
 
