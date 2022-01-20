@@ -160,7 +160,8 @@ export default function HotelInformation(props) {
         onCellEditCommit={handleCellEditCommit}
         disableColumnMenu 
         hideFooterPagination 
-        hideFooterSelectedRowCount />
+        hideFooterSelectedRowCount
+        headerHeight={0} />
       {!!snackbar && (
         <Snackbar open 
           onClose={handleCloseSnackbar} 

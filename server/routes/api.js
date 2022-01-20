@@ -1800,6 +1800,41 @@ router.delete('/hotels/:id/rates', function(req, res, next){
 
 });
 
+/* POST (CREATE) booking */
+router.post('/hotels/:id/bookings', function(req, res, next){
+
+});
+
+/* GET bookings */
+router.get('/hotels/:id/bookings', function(req, res, next){
+
+});
+
+/* PUT (UPDATE) booking */
+router.put('/hotels/:id/bookings/:id', function(req, res, next){
+
+});
+
+/* DELETE booking */
+router.delete('/hotels/:id/bookings', function(req, res, next){
+
+});
+
+/* POST (create) tourist */
+router.post('/tourists', function(req, res, next){
+
+});
+
+/* GET tourist(s) */
+router.get('/tourists/:id', function(req, res, next){
+
+});
+
+/* PUT (UPDATE) tourist information */
+router.put('/tourists/:id', function(req, res, next){
+
+});
+
 /* Final route: handler for all the incorrect / invalid requests */
 router.all('*', function(req, res, next) {
   
