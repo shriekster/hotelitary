@@ -72,7 +72,7 @@ export default function Rates(props) {
     rate: '',
   });
 
-   const fetchHistoryAndLatestRates = async () => {
+  const fetchHistoryAndLatestRates = async () => {
   // MUST FIX BUG
     const requestOptions = {
       method: 'GET',

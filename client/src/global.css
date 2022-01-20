@@ -36,9 +36,6 @@ html {
     justify-content: center;
     flex-grow: 1;
   }
-  .Bookings-root {
-    flex-direction: column;
-  }
 
   .Settings-root .MuiImageListItem-root:hover {
     background: rgba(53, 186, 246, 0.5);
@@ -62,4 +59,25 @@ html {
 
   .MuiTooltip-tooltip {
     max-width: none !important;
+  }
+
+  .Bookings-root {
+    flex-direction: column;
+  }
+
+  .Bookings-title,
+  .Bookings-buttons {
+    width: 100%;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .Bookings-data {
+    width: 100%;
+    height: calc(100vh - 144px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
   }

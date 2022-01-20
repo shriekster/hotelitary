@@ -1800,6 +1800,67 @@ router.delete('/hotels/:id/rates', function(req, res, next){
 
 });
 
+/******************************** BOOKINGS ********************************/
+/* GET bookings dates */
+router.get('/hotels/:id/bookings/dates', function(req, res, next){
+
+  const hotelId = req.params.id;
+
+  const isValid = !isNaN(hotelId) && hotelId > 0;
+
+  if (isValid) {
+
+    const selectBookedDates = db.prepare(`
+      SELECT Data FROM DateRezervari AS data`);
+    
+    let bookedDates = [], bookedDatesRows, err;
+
+    try {
+
+      bookedDatesRows = selectBookedDates.all();
+
+      bookedDates = bookedDatesRows.map(row => row.data);
+
+    } catch (error) {
+
+      err = error;
+
+    } finally {
+
+      if (!err) {
+
+        res.status(200).json({
+          data: {
+            bookedDates: bookedDates,
+          },
+          error: false,
+          message: 'OK!'
+        });
+
+      } else {
+
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare la citirea datelor rezervărilor!'
+        });
+        
+      }
+
+    }
+
+  } else {
+
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Eroare la citirea datelor rezervărilor!'
+    });
+
+  }
+
+});
+
 /* POST (CREATE) booking */
 router.post('/hotels/:id/bookings', function(req, res, next){
 
