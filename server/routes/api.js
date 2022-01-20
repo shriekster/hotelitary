@@ -1429,7 +1429,11 @@ router.get('/hotels/:id/rates/history', function(req, res, next) {
 
       }
 
-      latestRatesId = dateRows[0].id;
+      if (dateRows && dateRows.length > 0) {
+
+        latestRatesId = dateRows[0].id;
+
+      }
 
       roomCategoriesRows = selectRoomCategories.all();
 
@@ -1457,7 +1461,7 @@ router.get('/hotels/:id/rates/history', function(req, res, next) {
 
     } catch (error) {
 
-      err = error;
+      err = error;console.log(err)
 
     } finally {
 
@@ -1465,11 +1469,19 @@ router.get('/hotels/:id/rates/history', function(req, res, next) {
 
         try {
 
-          rateInformation = selectRateInformation.all(latestRatesId);
+          if (latestRatesId) {
+
+            rateInformation = selectRateInformation.all(latestRatesId);
+
+          } else {
+
+            rateInformation = [];
+
+          }
 
         } catch (error) {
 
-          err = error;
+          err = error;console.log(err)
 
         } finally {
 
@@ -1703,7 +1715,7 @@ router.put('/hotels/:id/rates/:rateId', function(req, res, next) {
 
 });
 
-/* DELETE rates */
+/* DELETE rates AND the date of update of the rates is there are no corresponding rates */
 router.delete('/hotels/:id/rates', function(req, res, next){
 
   const hotelId = Number(req.params.id);

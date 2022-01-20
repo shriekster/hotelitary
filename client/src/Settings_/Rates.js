@@ -569,7 +569,7 @@ export default function Rates(props) {
         setExistingDates((prevExistingDates) => [...newExistingDates]);
         setSelectedDate(formattedDate);
         queueMicrotask( async () => {
-          console.log(existingDates, formattedDate)
+          //console.log(existingDates, formattedDate)
           //if (existingDates.includes(formattedDate)) {
             //setSelectedDateIndex(newIndex);
             //setSelectedDate(formattedDate);
