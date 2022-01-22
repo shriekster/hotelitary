@@ -246,8 +246,10 @@ export default function Bookings() {
   }
 
   const handleEditBooking = async (bookingId) => {
+    
     setEditingBookingId(bookingId);
     setOpenEditBooking(true);
+    
   }
 
   const handleCancelEditBooking = () => {

@@ -1950,6 +1950,11 @@ router.get('/hotels/:id/bookings/preview/:date', function(req, res, next){
 
         const id = bookingsRows[i].rezervareId;
 
+        const [start, end] = bookingsRows[i].perioada.split(' - ');
+        const from = start.split('-').reverse().join('.');
+        const to = end.split('-').reverse().join('.');
+        const period = `${from} - ${to}`;
+
         if (!bookings.length) {
 
           bookings.push({
@@ -1960,7 +1965,7 @@ router.get('/hotels/:id/bookings/preview/:date', function(req, res, next){
                 id: bookingsRows[i].turistId,
                 numeComplet: bookingsRows[i].numeComplet,
                 scopSosire: bookingsRows[i].scopSosire,
-                perioada: bookingsRows[i].perioada,
+                perioada: period,
                 totalPlata: bookingsRows[i].totalPlata
               }]
             }]
@@ -1985,7 +1990,7 @@ router.get('/hotels/:id/bookings/preview/:date', function(req, res, next){
                 id: bookingsRows[i].turistId,
                 numeComplet: bookingsRows[i].numeComplet,
                 scopSosire: bookingsRows[i].scopSosire,
-                perioada: bookingsRows[i].perioada,
+                perioada: period,
                 totalPlata: bookingsRows[i].totalPlata
               });
 
@@ -1997,7 +2002,7 @@ router.get('/hotels/:id/bookings/preview/:date', function(req, res, next){
                   id: bookingsRows[i].turistId,
                   numeComplet: bookingsRows[i].numeComplet,
                   scopSosire: bookingsRows[i].scopSosire,
-                  perioada: bookingsRows[i].perioada,
+                  perioada: period,
                   totalPlata: bookingsRows[i].totalPlata
                 }]
               });
@@ -2013,7 +2018,7 @@ router.get('/hotels/:id/bookings/preview/:date', function(req, res, next){
                 turisti: [{
                   numeComplet: bookingsRows[i].numeComplet,
                   scopSosire: bookingsRows[i].scopSosire,
-                  perioada: bookingsRows[i].perioada,
+                  perioada: period,
                   totalPlata: bookingsRows[i].totalPlata
                 }]
               }]
