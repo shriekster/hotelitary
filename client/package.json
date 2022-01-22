@@ -44,5 +44,6 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "https://localhost:3001"
+  "proxy": "https://localhost:3001",
+  "homepage": "https://localhost:3001"
 }
