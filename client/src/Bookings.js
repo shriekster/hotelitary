@@ -325,7 +325,8 @@ export default function Bookings() {
                       return (
                         <TableBody key={booking.id} 
                           className='Bookings-tbody'
-                          onClick={() => {handleEditBooking(booking.id)}}>
+                          onClick={() => {handleEditBooking(booking.id)}}
+                          title={`Modifică rezervarea #${booking.id}`}>
                         {
                         booking.camere.map((room, roomIndex) => {
                           const secondCellRowSpan = room.turisti.length;
