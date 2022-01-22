@@ -10,6 +10,8 @@ import PickersDay from '@mui/lab/PickersDay';
 import CircularProgress from '@mui/material/CircularProgress';
 import Badge from '@mui/material/Badge';
 import Dialog from '@mui/material/Dialog';
+import Fab from '@mui/material/Fab';
+import AddIcon from '@mui/icons-material/Add';
 
 import DialogActions from '@mui/material/DialogActions';
 import AppBar from '@mui/material/AppBar';
@@ -57,6 +59,9 @@ export default function Bookings() {
   const [snackbar, setSnackbar] = useState(null);
 
   const [openEditBooking, setOpenEditBooking] = useState(false);
+  const [editingBookingId, setEditingBookingId] = useState('');
+
+  const [openAddBooking, setOpenAddBooking] = useState(false);
 
   const datesAbortController = useRef(null);
 
@@ -216,14 +221,28 @@ export default function Bookings() {
   }
 
   const handleEditBooking = async (bookingId) => {
+    setEditingBookingId(bookingId);
     setOpenEditBooking(true);
   }
 
   const handleCancelEditBooking = () => {
+    setEditingBookingId('');
     setOpenEditBooking(false);
   }
 
   const handleUpdateBooking = async () => {
+
+  }
+
+  const handleAddBooking = () => {
+    setOpenAddBooking(true);
+  }
+
+  const handleCancelAddBooking = () => {
+    setOpenAddBooking(false);
+  }
+
+  const handleCreateBooking = async () => {
 
   }
 
@@ -348,7 +367,18 @@ export default function Bookings() {
         }
       </div>
       <div className='Bookings-buttons'>
-
+      <Tooltip title={<Typography variant='body2'>Creează o rezervare</Typography>}
+        arrow={true}
+        placement='left'>
+        <span>
+        <Fab color='primary' 
+          aria-label='adaugă'
+          onClick={handleAddBooking}
+          disabled={loading}>
+          <AddIcon />
+        </Fab>
+        </span>
+      </Tooltip>
       </div>
       <Dialog
         fullScreen
@@ -360,7 +390,7 @@ export default function Bookings() {
             disableGutters
             sx={{width: '98%'}}>
             <Typography sx={{ flex: 1, width: '100%', textAlign: 'center' }} variant="h6" component="div">
-              Sound
+              Modifică rezervarea #{editingBookingId}
             </Typography>
             <IconButton
               edge='end'
@@ -391,6 +421,52 @@ export default function Bookings() {
           <Button variant='contained'
             color='error'
             onClick={handleCancelEditBooking}
+            disabled={loading}>
+            Renunță
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        fullScreen
+        open={openAddBooking}
+        onClose={handleCancelAddBooking}
+        TransitionComponent={Transition}>
+        <AppBar sx={{ position: 'relative', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Toolbar variant='dense'
+            disableGutters
+            sx={{width: '98%'}}>
+            <Typography sx={{ flex: 1, width: '100%', textAlign: 'center' }} variant="h6" component="div">
+              Creează rezervare
+            </Typography>
+            <IconButton
+              edge='end'
+              color='error'
+              onClick={handleCancelAddBooking}
+              aria-label='close'
+            >
+              <CloseIcon />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+        <div className='Bookings-add-container'>
+          
+        </div>
+        <DialogActions sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '56px'
+        }}>
+          <Button autoFocus
+            variant='contained'
+            color='primary'
+            onClick={handleCreateBooking}
+            disabled={loading}>
+            Salvează
+          </Button>
+          <Button variant='contained'
+            color='error'
+            onClick={handleCancelAddBooking}
             disabled={loading}>
             Renunță
           </Button>

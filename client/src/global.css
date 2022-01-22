@@ -74,6 +74,11 @@ html {
     justify-content: center;
   }
 
+  .Bookings-buttons {
+    justify-content: flex-end;
+  }
+
+
   .Bookings-data {
     width: 100%;
     height: calc(100vh - 144px);
@@ -95,7 +100,8 @@ html {
     cursor: pointer;
   }
 
-  .Bookings-edit-container {
+  .Bookings-edit-container,
+  .Bookings-add-container {
     display: flex;
     align-items: center;
     justify-content: center;
