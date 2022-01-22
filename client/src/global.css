@@ -109,25 +109,9 @@ html {
 
   .Booking-room {
     width: 98%;
-    border: 1px solid rgba(128, 128, 128, 0.5);
-    margin: 16px auto;
+    margin: 112px auto;
     border-radius: 4px;
-    position: relative;
-    
-    height: 50vh;
+    position: relative;    
+    height: calc(50vh - 56px);
   }
 
-  .Booking-tourist {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    width: 98%;
-    margin: 16px auto;
-  }
-
-  .Booking-tourist-attribute {
-    display: block;
-    width: max(400px, 30%);
-    margin: 16px !important;
-  }

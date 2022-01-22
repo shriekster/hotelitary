@@ -598,7 +598,7 @@ export default function Bookings() {
             !!editingBookingData[0] && !!editingBookingData[0].camere.length &&
             editingBookingData[0].camere.map((room) => (
               <div className='Booking-room' key={`${editingBookingData[0].id}-${room.numar}`}>
-                <Typography sx={{ margin: '16px' }}>Camera #{room.numar}</Typography>
+                <Typography sx={{position: 'absolute', top: '-32px', left: '4px' }}>Camera #{room.numar}</Typography>
                 <DataGrid sx={{
                     width: '100%',
                   }} 
