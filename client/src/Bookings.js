@@ -12,6 +12,7 @@ import Badge from '@mui/material/Badge';
 import Dialog from '@mui/material/Dialog';
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 import DialogActions from '@mui/material/DialogActions';
 import AppBar from '@mui/material/AppBar';
@@ -238,6 +239,65 @@ export default function Bookings() {
 
   }
 
+  const handleDeleteBooking = async () => {
+
+    const requestOptions = {
+      method: 'DELETE',
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        bookingId: editingBookingId,
+      })
+    };
+
+    let response, json, err;
+
+    setLoading(true);
+
+    try {
+
+      response = await fetch(`/api/hotels/1/bookings`, requestOptions);
+
+      json = await response.json();
+
+    } catch (error) {
+
+      err = error;
+
+    } finally {
+
+      setLoading(false);
+
+      if (!err && response.ok) {
+
+        setSnackbar({ children: json.message, severity: 'success' });
+
+        queueMicrotask(() => {
+
+          setOpenEditBooking(false);
+
+        });
+
+        queueMicrotask(async () => {
+
+          await fetchBookedDates();
+
+          await fetchBookings();
+
+        });
+
+      } else {
+
+        setSnackbar({ children: json.message, severity: 'error' });
+
+      }
+
+    }
+
+  }
+
   const handleAddBooking = () => {
     setOpenAddBooking(true);
   }
@@ -394,15 +454,27 @@ export default function Bookings() {
           <Toolbar variant='dense'
             disableGutters
             sx={{width: '98%'}}>
+            <Tooltip title={<Typography variant='body2'>{`Șterge rezervarea #${editingBookingId}`}</Typography>}
+              arrow={true}
+              placement='right'>
+              <span>
+              <IconButton color='error'
+                disabled={loading}
+                edge='start'
+                onClick={handleDeleteBooking}>
+                <DeleteForeverIcon/>
+              </IconButton>
+              </span>
+            </Tooltip>
             <Typography sx={{ flex: 1, width: '100%', textAlign: 'center' }} variant="h6" component="div">
               Modifică rezervarea #{editingBookingId}
             </Typography>
             <IconButton
+              disabled={loading}
               edge='end'
               color='error'
               onClick={handleCancelEditBooking}
-              aria-label='close'
-            >
+              aria-label='close'>
               <CloseIcon />
             </IconButton>
           </Toolbar>

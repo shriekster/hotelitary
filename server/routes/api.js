@@ -1902,7 +1902,6 @@ router.get('/hotels/:id/bookings/preview/:date', function(req, res, next){
     const selectBookings = db.prepare(`
     SELECT
       Rezervari.ID AS rezervareId,
-      Rezervari.Status AS rezervareStatus,
       Spatii.Numar AS numarCamera,
       Turisti.ID as turistId,
       (Turisti.Nume || ' ' || Turisti.Prenume) AS numeComplet, 
@@ -1914,8 +1913,6 @@ router.get('/hotels/:id/bookings/preview/:date', function(req, res, next){
       INNER JOIN Rezervari ON Rezervari.ID = Rezervari_Spatii.RezervareID
       INNER JOIN Spatii ON Spatii.ID = Rezervari_Spatii.SpatiuID
       INNER JOIN Turisti ON Turisti.ID = Rezervari_Spatii_Turisti.TuristID
-      WHERE 
-          Rezervari.Status = 1
       AND
           ? BETWEEN Rezervari_Spatii_Turisti.DataInceput AND Rezervari_Spatii_Turisti.DataSfarsit
       ORDER BY 
@@ -2213,6 +2210,59 @@ router.put('/hotels/:id/bookings/:id', function(req, res, next){
 
 /* DELETE booking */
 router.delete('/hotels/:id/bookings', function(req, res, next){
+
+  const hotelId = req.params.id;
+  const bookingId = req.body.bookingId;
+
+  const isValid = !isNaN(hotelId) && hotelId > 0 && !isNaN(bookingId) && bookingId > 0;
+
+  if (isValid) {
+
+    const deleteBooking = db.prepare(`
+      DELETE FROM Rezervari
+      WHERE ID = ?`);
+
+    let err;
+
+    try {
+
+      deleteBooking.run(Number(bookingId));
+
+    } catch (error) {
+
+      err = error;
+
+    } finally {
+
+      if (!err) {
+
+        res.status(200).json({
+          data: null,
+          error: false,
+          message: 'Rezervare anulată cu succes!'
+        });
+
+      } else {
+
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare la ștergerea rezervării, încearcă din nou!'
+        });
+
+      }
+
+    }
+
+  } else {
+
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Eroare la ștergerea rezervării!'
+    });
+
+  }
 
 });
 
