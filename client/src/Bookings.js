@@ -85,6 +85,7 @@ export default function Bookings() {
 
   const [openEditBooking, setOpenEditBooking] = useState(false);
   const [editingBookingId, setEditingBookingId] = useState('');
+  const [editingBookingData, setEditingBookingData] = useState({});
 
   const [openAddBooking, setOpenAddBooking] = useState(false);
 
@@ -249,7 +250,69 @@ export default function Bookings() {
     
     setEditingBookingId(bookingId);
     setOpenEditBooking(true);
+    setLoading(true);
+
+    const requestOptions = {
+      method: 'GET',
+      mode: 'cors',
+    };
+
+    let response, json, err;
+
+    try {
+
+      response = await fetch(`/api/hotels/1/bookings/${editingBookingId}`, requestOptions);
+
+      json = await response.json();
+
+    } catch (error) {
+
+      err = error;
+
+    } finally {
+
+      setLoading(false);
+
+      if (!err) {
+
+        if (response.ok) {
+        
+          const data = json.data;
+
+          if (data && data.booking) {
+
+            setEditingBookingData(data.booking);
+
+          }
+
+        } else {
     
+          setSnackbar({ children: 'Eroare, încearcă din nou!', severity: 'error' });
+          setLoading(true);
+
+          const timeout = setTimeout(() => {
+            setOpenEditBooking(false);
+            setLoading(false);
+            clearTimeout(timeout);
+          }, 1000);
+    
+        }
+
+      } else {
+    
+        setSnackbar({ children: 'Eroare, încearcă din nou!', severity: 'error' });
+        setLoading(true);
+
+        const timeout = setTimeout(() => {
+          setOpenEditBooking(false);
+          setLoading(false);
+          clearTimeout(timeout);
+        }, 1000);
+  
+      }
+  
+    }
+
   }
 
   const handleCancelEditBooking = () => {
@@ -542,7 +605,7 @@ export default function Bookings() {
               color='error'
               onClick={handleCancelAddBooking}
               aria-label='close'
-            >
+              disabled={loading}>
               <CloseIcon />
             </IconButton>
           </Toolbar>

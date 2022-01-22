@@ -2071,13 +2071,11 @@ router.get('/hotels/:id/bookings/preview/:date', function(req, res, next){
 });
 
 /* GET complete booking information by ID */
-router.get('/hotels/:id/bookings/:id', function(req, res, next){
+router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
   
   const hotelId = req.params.id;
-  const date = req.params.date;
-  const isValidDate = !!date && new Date(date).toString() !== 'Invalid Date';
-  const isValidHotelId = !isNaN(hotelId) && hotelId > 0;
-  const isValid = isValidHotelId && isValidDate;
+  const bookingId = req.params.bookingId;
+  const isValid = !isNaN(hotelId) && hotelId > 0 && !isNaN(bookingId) && bookingId > 0;
 
   if (isValid) {
 
