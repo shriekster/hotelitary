@@ -53,6 +53,26 @@ const TransitionUp = forwardRef(function Transition(props, ref) {
 
 export default function Bookings() {
 
+  const scopuriSosire = [
+    'Misiune',
+    'Detașat',
+    'Acord de reciprocitate',
+    'Beneficiar gratuitate',
+    'Interes personal',
+    'Permanent',
+    'Altele',
+  ];
+
+  const scopuriSosireMap = {
+    'Misiune': 1,
+    'Detașat': 2,
+    'Acord de reciprocitate': 3,
+    'Beneficiar gratuitate': 4,
+    'Interes personal': 5,
+    'Permanent': 6,
+    'Altele': 7,
+  };
+
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [bookedDates, setBookedDates] = useState([]);
   const [bookingDates, setBookingDates] = useState([null, null]);

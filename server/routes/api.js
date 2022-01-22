@@ -1801,6 +1801,27 @@ router.delete('/hotels/:id/rates', function(req, res, next){
 });
 
 /******************************** BOOKINGS ********************************/
+
+const scopuriSosire = [
+  'Misiune',
+  'Detașat',
+  'Acord de reciprocitate',
+  'Beneficiar gratuitate',
+  'Interes personal',
+  'Permanent',
+  'Altele',
+];
+
+const scopuriSosireMap = {
+  'Misiune': 1,
+  'Detașat': 2,
+  'Acord de reciprocitate': 3,
+  'Beneficiar gratuitate': 4,
+  'Interes personal': 5,
+  'Permanent': 6,
+  'Altele': 7,
+};
+
 /* GET booked dates */
 router.get('/hotels/:id/bookings/dates/:date', function(req, res, next){
 
