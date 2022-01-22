@@ -41,7 +41,6 @@ export default function Rates(props) {
     { field: 'roomCategory', type: 'singleSelect', valueOptions: roomTypeOptions, headerName: 'Denumire spațiu', flex: 2, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
     { field: 'roomCategoryDescription', type: 'singleSelect', valueOptions: roomTypeDescriptionOptions, headerName: 'Descriere', flex: 2, sortable: false, filterable: false, align: 'center', headerAlign: 'center',},
     { field: 'rate', headerName: 'Tarif (100%)', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true,},
-    
   ];
 
   const [rows, setRows] = useState(() => []);

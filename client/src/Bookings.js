@@ -29,6 +29,8 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
+import Autocomplete from '@mui/material/Autocomplete';
+import { DataGrid, GridRowsProp, GridColDef } from '@mui/x-data-grid';
 
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
@@ -73,6 +75,25 @@ export default function Bookings() {
     'Altele': 7,
   };
 
+  const touristDataColumns = [
+    //{ field: 'attribute', headerName: '', flex: 1, sortable: false, filterable: false, align: 'center', cellClassName: 'Settings-attribute-cell'},
+    { field: 'id', headerName: 'ID', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', hide: true, },
+    { field: 'cnp', headerName: 'CNP', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
+    { field: 'nume', headerName: 'Nume', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
+    { field: 'prenume', headerName: 'Prenume', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
+    { field: 'grad', headerName: 'Grad', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
+    { field: 'institutie', headerName: 'U.M. și garnizoana', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
+    { field: 'numarDocumentMilitar', headerName: 'Nr. ordin serviciu / legitimație', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
+    { field: 'serieNumarCI', headerName: 'Serie și număr CI', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
+    { field: 'scopSosire', type: 'singleSelect', valueOptions: scopuriSosire, headerName: 'Scop sosire', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
+    { field: 'perioada', headerName: 'Perioada', flex: 2, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: false},
+    { field: 'numarZile', headerName: 'Număr de zile', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
+    { field: 'totalPlata', headerName: 'Total de plată', flex: 1, sortable: false, filterable: false, align: 'center', headerAlign: 'center', editable: true},
+
+
+
+  ]
+
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [bookedDates, setBookedDates] = useState([]);
   const [bookingDates, setBookingDates] = useState([null, null]);
@@ -84,10 +105,12 @@ export default function Bookings() {
   const [snackbar, setSnackbar] = useState(null);
 
   const [openEditBooking, setOpenEditBooking] = useState(false);
-  const [editingBookingId, setEditingBookingId] = useState('');
+  const [editingBookingId, setEditingBookingId] = useState(0);
   const [editingBookingData, setEditingBookingData] = useState({});
 
   const [openAddBooking, setOpenAddBooking] = useState(false);
+
+  const [selectionModel, setSelectionModel] = useState([]);
 
   const datesAbortController = useRef(null);
 
@@ -247,11 +270,11 @@ export default function Bookings() {
   }
 
   const handleEditBooking = async (bookingId) => {
-    
-    setEditingBookingId(bookingId);
+        
+    setEditingBookingId(bookingId); // bug here (??? editingBookingId does not update in time, most probably I do not yet fully understand React)
     setOpenEditBooking(true);
     setLoading(true);
-
+    
     const requestOptions = {
       method: 'GET',
       mode: 'cors',
@@ -261,7 +284,7 @@ export default function Bookings() {
 
     try {
 
-      response = await fetch(`/api/hotels/1/bookings/${editingBookingId}`, requestOptions);
+      response = await fetch(`/api/hotels/1/bookings/${bookingId}`, requestOptions);
 
       json = await response.json();
 
@@ -270,7 +293,7 @@ export default function Bookings() {
       err = error;
 
     } finally {
-
+      
       setLoading(false);
 
       if (!err) {
@@ -316,7 +339,7 @@ export default function Bookings() {
   }
 
   const handleCancelEditBooking = () => {
-    setEditingBookingId('');
+    setEditingBookingId(0);
     setOpenEditBooking(false);
   }
 
@@ -392,6 +415,12 @@ export default function Bookings() {
   }
 
   const handleCreateBooking = async () => {
+
+  }
+
+  const handleSelectionModelChange = (newSelectionModel) => {
+
+    setSelectionModel(newSelectionModel);
 
   }
 
@@ -565,7 +594,48 @@ export default function Bookings() {
           </Toolbar>
         </AppBar>
         <div className='Bookings-edit-container'>
-          
+          {
+            !!editingBookingData[0] && !!editingBookingData[0].camere.length &&
+            editingBookingData[0].camere.map((room) => (
+              <div className='Booking-room' key={`${editingBookingData[0].id}-${room.numar}`}>
+                <Typography sx={{ margin: '16px' }}>Camera #{room.numar}</Typography>
+                <DataGrid sx={{
+                    width: '100%',
+                  }} 
+                  rows={room.turisti} 
+                  columns={touristDataColumns}
+                  //onCellEditCommit={handleNewCellEditCommit}
+                  disableColumnMenu 
+                  hideFooterPagination 
+                  hideFooterSelectedRowCount
+                  localeText={{
+                    noRowsLabel: 'Nu există date'
+                  }}
+                  checkboxSelection
+                  disableSelectionOnClick
+                  onSelectionModelChange={handleSelectionModelChange}
+                  selectionModel={selectionModel}
+                  columnBuffer={2} 
+                  columnThreshold={2}/>
+                  {
+                    loading &&
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      height: '50vh',
+                      width: '100%',
+                      background: 'rgba(128, 128, 128, 0.25)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <CircularProgress disableShrink/>
+                    </div>
+                  }
+              </div>
+            ))
+          }
         </div>
         <DialogActions sx={{
             display: 'flex',

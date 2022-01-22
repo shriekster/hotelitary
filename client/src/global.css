@@ -102,8 +102,32 @@ html {
 
   .Bookings-edit-container,
   .Bookings-add-container {
+    height: calc(100vh - 112px);
+    width: 100%;
+    overflow: auto;
+  }
+
+  .Booking-room {
+    width: 98%;
+    border: 1px solid rgba(128, 128, 128, 0.5);
+    margin: 16px auto;
+    border-radius: 4px;
+    position: relative;
+    
+    height: 50vh;
+  }
+
+  .Booking-tourist {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: calc(100vh - 112px);
+    flex-direction: column;
+    width: 98%;
+    margin: 16px auto;
+  }
+
+  .Booking-tourist-attribute {
+    display: block;
+    width: max(400px, 30%);
+    margin: 16px !important;
   }
