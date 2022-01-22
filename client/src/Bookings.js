@@ -42,8 +42,12 @@ import Slide from '@mui/material/Slide';
  * }
  */ 
 
- const Transition = forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
+const TransitionLeft = forwardRef(function Transition(props, ref) {
+  return <Slide direction='left' ref={ref} {...props} />;
+});
+
+const TransitionUp = forwardRef(function Transition(props, ref) {
+  return <Slide direction='up' ref={ref} {...props} />;
 });
 
 export default function Bookings() {
@@ -385,7 +389,7 @@ export default function Bookings() {
         fullScreen
         open={openEditBooking}
         onClose={handleCancelEditBooking}
-        TransitionComponent={Transition}>
+        TransitionComponent={TransitionUp}>
         <AppBar sx={{ position: 'relative', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Toolbar variant='dense'
             disableGutters
@@ -431,7 +435,7 @@ export default function Bookings() {
         fullScreen
         open={openAddBooking}
         onClose={handleCancelAddBooking}
-        TransitionComponent={Transition}>
+        TransitionComponent={TransitionLeft}>
         <AppBar sx={{ position: 'relative', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Toolbar variant='dense'
             disableGutters
