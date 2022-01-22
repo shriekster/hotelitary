@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, forwardRef } from 'react';
 
 import TextField from '@mui/material/TextField';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
@@ -9,7 +9,14 @@ import DateRangePicker from '@mui/lab/DateRangePicker';
 import PickersDay from '@mui/lab/PickersDay';
 import CircularProgress from '@mui/material/CircularProgress';
 import Badge from '@mui/material/Badge';
-import EventIcon from '@mui/icons-material/Event';
+import Dialog from '@mui/material/Dialog';
+
+import DialogActions from '@mui/material/DialogActions';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
+import CloseIcon from '@mui/icons-material/Close';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -23,6 +30,7 @@ import Typography from '@mui/material/Typography';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import Tooltip from '@mui/material/Tooltip';
+import Slide from '@mui/material/Slide';
 
 /**
  * status = {
@@ -31,6 +39,10 @@ import Tooltip from '@mui/material/Tooltip';
  * 2: incheiata
  * }
  */ 
+
+ const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 export default function Bookings() {
 
@@ -43,6 +55,8 @@ export default function Bookings() {
   const [loading, setLoading] = useState(false);
 
   const [snackbar, setSnackbar] = useState(null);
+
+  const [openEditBooking, setOpenEditBooking] = useState(false);
 
   const datesAbortController = useRef(null);
 
@@ -127,7 +141,7 @@ export default function Bookings() {
 
     try {
 
-      response = await fetch(`/api/hotels/1/bookings/${date}`, requestOptions);
+      response = await fetch(`/api/hotels/1/bookings/preview/${date}`, requestOptions);
 
       json = await response.json();
 
@@ -201,6 +215,18 @@ export default function Bookings() {
 
   }
 
+  const handleEditBooking = async (bookingId) => {
+    setOpenEditBooking(true);
+  }
+
+  const handleCancelEditBooking = () => {
+    setOpenEditBooking(false);
+  }
+
+  const handleUpdateBooking = async () => {
+
+  }
+
   useEffect(() => {
 
       fetchBookedDates();
@@ -268,38 +294,43 @@ export default function Bookings() {
                       <TableCell align='center'>Total de plată</TableCell>
                   </TableRow>
                   </TableHead>
-                  <TableBody>
-                    {
-                      bookings.map((booking, bookingIndex) => { 
-                        let firstCellRowSpan = 0;
-                        for (let i = 0; i < booking.camere.length; i++) {
-                          for (let j = 0; j < booking.camere[i].turisti.length; j++) {
-                            firstCellRowSpan++;
-                          }
+                  {
+                    bookings.map((booking, bookingIndex) => 
+                    {  
+                      let firstCellRowSpan = 0;
+                      for (let i = 0; i < booking.camere.length; i++) {
+                        for (let j = 0; j < booking.camere[i].turisti.length; j++) {
+                          firstCellRowSpan++;
                         }
-                        return booking.camere.map((room, roomIndex) => {
+                      }
+                      return (
+                        <TableBody key={booking.id} 
+                          className='Bookings-tbody'
+                          onClick={() => {handleEditBooking(booking.id)}}>
+                        {
+                        booking.camere.map((room, roomIndex) => {
                           const secondCellRowSpan = room.turisti.length;
                           return room.turisti.map((tourist, touristIndex) => {
                             return !roomIndex && !touristIndex ? (
-                            <TableRow>
-                              <TableCell align='center' rowSpan={firstCellRowSpan}>{booking.id}</TableCell>
-                              <TableCell align='center' rowSpan={secondCellRowSpan}>{room.numar}</TableCell>
-                              <TableCell align='center'>{tourist.numeComplet}</TableCell>
-                              <TableCell align='center'>{tourist.scopSosire}</TableCell>
-                              <TableCell align='center'>{tourist.perioada}</TableCell>
-                              <TableCell align='center'>{tourist.totalPlata}</TableCell>
-                            </TableRow>
-                            ) : (
-                              !touristIndex ? (
-                              <TableRow>
+                              <TableRow key={`${booking.id}-${tourist.id}`}>
+                                <TableCell align='center' rowSpan={firstCellRowSpan}>{booking.id}</TableCell>
                                 <TableCell align='center' rowSpan={secondCellRowSpan}>{room.numar}</TableCell>
                                 <TableCell align='center'>{tourist.numeComplet}</TableCell>
                                 <TableCell align='center'>{tourist.scopSosire}</TableCell>
                                 <TableCell align='center'>{tourist.perioada}</TableCell>
                                 <TableCell align='center'>{tourist.totalPlata}</TableCell>
                               </TableRow>
+                            ) : (
+                              !touristIndex ? (
+                                <TableRow key={`${booking.id}-${tourist.id}`}>
+                                  <TableCell align='center' rowSpan={secondCellRowSpan}>{room.numar}</TableCell>
+                                  <TableCell align='center'>{tourist.numeComplet}</TableCell>
+                                  <TableCell align='center'>{tourist.scopSosire}</TableCell>
+                                  <TableCell align='center'>{tourist.perioada}</TableCell>
+                                  <TableCell align='center'>{tourist.totalPlata}</TableCell>
+                                </TableRow>
                               ) : (
-                                <TableRow>
+                                <TableRow key={`${booking.id}-${tourist.id}`}>
                                   <TableCell align='center'>{tourist.numeComplet}</TableCell>
                                   <TableCell align='center'>{tourist.scopSosire}</TableCell>
                                   <TableCell align='center'>{tourist.perioada}</TableCell>
@@ -308,10 +339,10 @@ export default function Bookings() {
                               )
                             )
                           })
-                        })
-                      })
-                    }
-                  </TableBody>
+                        })}
+                        </TableBody>)
+                    })
+                  }
               </Table>
           </TableContainer>)
         }
@@ -319,6 +350,52 @@ export default function Bookings() {
       <div className='Bookings-buttons'>
 
       </div>
+      <Dialog
+        fullScreen
+        open={openEditBooking}
+        onClose={handleCancelEditBooking}
+        TransitionComponent={Transition}>
+        <AppBar sx={{ position: 'relative', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Toolbar variant='dense'
+            disableGutters
+            sx={{width: '98%'}}>
+            <Typography sx={{ flex: 1, width: '100%', textAlign: 'center' }} variant="h6" component="div">
+              Sound
+            </Typography>
+            <IconButton
+              edge='end'
+              color='error'
+              onClick={handleCancelEditBooking}
+              aria-label='close'
+            >
+              <CloseIcon />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+        <div className='Bookings-edit-container'>
+          
+        </div>
+        <DialogActions sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '56px'
+        }}>
+          <Button autoFocus
+            variant='contained'
+            color='primary'
+            onClick={handleUpdateBooking}
+            disabled={loading}>
+            Salvează
+          </Button>
+          <Button variant='contained'
+            color='error'
+            onClick={handleCancelEditBooking}
+            disabled={loading}>
+            Renunță
+          </Button>
+        </DialogActions>
+      </Dialog>
       {!!snackbar && (
         <Snackbar open 
           onClose={handleCloseSnackbar} 

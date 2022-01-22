@@ -89,3 +89,15 @@ html {
     align-items: center;
     justify-content: center;
   }
+
+  .Bookings-tbody:hover {
+    background-color: rgba(128, 128, 128, 0.5);
+    cursor: pointer;
+  }
+
+  .Bookings-edit-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 112px);
+  }

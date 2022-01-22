@@ -1888,8 +1888,8 @@ router.post('/hotels/:id/bookings', function(req, res, next){
 
 });
 
-/* GET bookings */
-router.get('/hotels/:id/bookings/:date', function(req, res, next){
+/* GET bookings previews by date */
+router.get('/hotels/:id/bookings/preview/:date', function(req, res, next){
   
   const hotelId = req.params.id;
   const date = req.params.date;
@@ -1903,7 +1903,8 @@ router.get('/hotels/:id/bookings/:date', function(req, res, next){
     SELECT
       Rezervari.ID AS rezervareId,
       Rezervari.Status AS rezervareStatus,
-      Spatii.Numar AS numarCamera, 
+      Spatii.Numar AS numarCamera,
+      Turisti.ID as turistId,
       (Turisti.Nume || ' ' || Turisti.Prenume) AS numeComplet, 
       Rezervari_Spatii_Turisti.ScopSosire AS scopSosire, 
       (Rezervari_Spatii_Turisti.DataInceput || ' - ' || Rezervari_Spatii_Turisti.DataSfarsit) AS perioada, 
@@ -1938,6 +1939,7 @@ router.get('/hotels/:id/bookings/:date', function(req, res, next){
             camere: [{
               numar: bookingsRows[i].numarCamera,
               turisti: [{
+                id: bookingsRows[i].turistId,
                 numeComplet: bookingsRows[i].numeComplet,
                 scopSosire: bookingsRows[i].scopSosire,
                 perioada: bookingsRows[i].perioada,
@@ -1962,6 +1964,7 @@ router.get('/hotels/:id/bookings/:date', function(req, res, next){
               const tourists = bookings[idIndex].camere[roomIndex].turisti;
 
               tourists.push({
+                id: bookingsRows[i].turistId,
                 numeComplet: bookingsRows[i].numeComplet,
                 scopSosire: bookingsRows[i].scopSosire,
                 perioada: bookingsRows[i].perioada,
@@ -1973,6 +1976,166 @@ router.get('/hotels/:id/bookings/:date', function(req, res, next){
               rooms.push({
                 numar: bookingsRows[i].numarCamera,
                 turisti: [{
+                  id: bookingsRows[i].turistId,
+                  numeComplet: bookingsRows[i].numeComplet,
+                  scopSosire: bookingsRows[i].scopSosire,
+                  perioada: bookingsRows[i].perioada,
+                  totalPlata: bookingsRows[i].totalPlata
+                }]
+              });
+
+            }
+
+          } else {
+
+            bookings.push({
+              id: id,
+              camere: [{
+                numar: bookingsRows[i].numarCamera,
+                turisti: [{
+                  numeComplet: bookingsRows[i].numeComplet,
+                  scopSosire: bookingsRows[i].scopSosire,
+                  perioada: bookingsRows[i].perioada,
+                  totalPlata: bookingsRows[i].totalPlata
+                }]
+              }]
+            });
+
+          }
+
+        }
+
+      }
+
+    } catch (error) {
+
+      err = error;
+
+    } finally {
+
+      if (!err) {
+
+        res.status(200).json({
+          data: {
+            bookings: bookings,
+          },
+          error: false,
+          message: 'OK!'
+        });
+
+      } else {
+
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare la citirea rezervărilor!'
+        });
+        
+      }
+
+    }
+
+  } else {
+
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Eroare la citirea rezervărilor!'
+    });
+
+  }
+
+});
+
+/* GET complete booking information by ID */
+router.get('/hotels/:id/bookings/:id', function(req, res, next){
+  
+  const hotelId = req.params.id;
+  const date = req.params.date;
+  const isValidDate = !!date && new Date(date).toString() !== 'Invalid Date';
+  const isValidHotelId = !isNaN(hotelId) && hotelId > 0;
+  const isValid = isValidHotelId && isValidDate;
+
+  if (isValid) {
+
+    const selectBookings = db.prepare(`
+    SELECT
+      Rezervari.ID AS rezervareId,
+      Rezervari.Status AS rezervareStatus,
+      Spatii.Numar AS numarCamera,
+      Turisti.ID as turistId,
+      (Turisti.Nume || ' ' || Turisti.Prenume) AS numeComplet, 
+      Rezervari_Spatii_Turisti.ScopSosire AS scopSosire, 
+      (Rezervari_Spatii_Turisti.DataInceput || ' - ' || Rezervari_Spatii_Turisti.DataSfarsit) AS perioada, 
+      Rezervari_Spatii_Turisti.TotalPlata AS totalPlata
+      FROM Rezervari_Spatii_Turisti
+      INNER JOIN Rezervari_Spatii ON Rezervari_Spatii.ID = Rezervari_Spatii_Turisti.RezervareSpatiuID
+      INNER JOIN Rezervari ON Rezervari.ID = Rezervari_Spatii.RezervareID
+      INNER JOIN Spatii ON Spatii.ID = Rezervari_Spatii.SpatiuID
+      INNER JOIN Turisti ON Turisti.ID = Rezervari_Spatii_Turisti.TuristID
+      WHERE 
+          Rezervari.Status = 1
+      AND
+          ? BETWEEN Rezervari_Spatii_Turisti.DataInceput AND Rezervari_Spatii_Turisti.DataSfarsit
+      ORDER BY 
+          Rezervari.ID ASC, 
+          abs(Spatii.Numar) ASC`);
+   
+    let bookings = [], bookingsRows, err;
+
+    try {
+
+      bookingsRows = selectBookings.all(date);
+
+      for (let i = 0; i < bookingsRows.length; i++) {
+
+        const id = bookingsRows[i].rezervareId;
+
+        if (!bookings.length) {
+
+          bookings.push({
+            id: id,
+            camere: [{
+              numar: bookingsRows[i].numarCamera,
+              turisti: [{
+                id: bookingsRows[i].turistId,
+                numeComplet: bookingsRows[i].numeComplet,
+                scopSosire: bookingsRows[i].scopSosire,
+                perioada: bookingsRows[i].perioada,
+                totalPlata: bookingsRows[i].totalPlata
+              }]
+            }]
+          });
+
+        } else {
+
+          const idIndex = bookings.map(record => record.id).indexOf(id);
+
+          if (idIndex >= 0) {
+
+            const roomNumber = bookingsRows[i].numarCamera;
+
+            const rooms = bookings[idIndex].camere;
+            const roomIndex = rooms.map(room => room.numar).indexOf(roomNumber);
+
+            if (roomIndex >= 0) {
+
+              const tourists = bookings[idIndex].camere[roomIndex].turisti;
+
+              tourists.push({
+                id: bookingsRows[i].turistId,
+                numeComplet: bookingsRows[i].numeComplet,
+                scopSosire: bookingsRows[i].scopSosire,
+                perioada: bookingsRows[i].perioada,
+                totalPlata: bookingsRows[i].totalPlata
+              });
+
+            } else {
+
+              rooms.push({
+                numar: bookingsRows[i].numarCamera,
+                turisti: [{
+                  id: bookingsRows[i].turistId,
                   numeComplet: bookingsRows[i].numeComplet,
                   scopSosire: bookingsRows[i].scopSosire,
                   perioada: bookingsRows[i].perioada,
