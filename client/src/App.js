@@ -100,7 +100,7 @@ function App() {
           <Tab icon={<SettingsIcon fontSize='large' />}
             {...a11yProps(0)} />
         </Tooltip>
-        <Tooltip title={<Typography>Rezervări</Typography>}
+        <Tooltip title={<Typography>Evidență</Typography>}
           placement='right'
           arrow>
           <Tab icon={<MenuBookIcon fontSize='large' />}

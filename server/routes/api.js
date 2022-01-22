@@ -1914,7 +1914,7 @@ router.get('/hotels/:id/bookings/:date', function(req, res, next){
       INNER JOIN Spatii ON Spatii.ID = Rezervari_Spatii.SpatiuID
       INNER JOIN Turisti ON Turisti.ID = Rezervari_Spatii_Turisti.TuristID
       WHERE 
-          Rezervari.Status = 0 OR 1
+          Rezervari.Status = 1
       AND
           ? BETWEEN Rezervari_Spatii_Turisti.DataInceput AND Rezervari_Spatii_Turisti.DataSfarsit
       ORDER BY 
