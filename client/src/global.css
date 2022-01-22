@@ -81,3 +81,11 @@ html {
     align-items: flex-start;
     justify-content: center;
   }
+
+  .Bookings-loading {
+    width: 100%;
+    height: calc(100vh - 144px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
