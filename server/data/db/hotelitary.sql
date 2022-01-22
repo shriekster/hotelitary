@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.3.3 on joi ian. 20 15:34:17 2022
+-- File generated with SQLiteStudio v3.3.3 on Sat Jan 22 21:39:28 2022
 --
 -- Text encoding used: UTF-8
 --
@@ -19,6 +19,9 @@ INSERT INTO Confort (ID, Denumire) VALUES (4, 'IV');
 
 -- Table: DateRezervari
 CREATE TABLE DateRezervari (ID INTEGER PRIMARY KEY, Data DATE);
+INSERT INTO DateRezervari (ID, Data) VALUES (1, '2022-01-01');
+INSERT INTO DateRezervari (ID, Data) VALUES (2, '2022-02-01');
+INSERT INTO DateRezervari (ID, Data) VALUES (3, '2022-03-01');
 
 -- Table: Etaje
 CREATE TABLE Etaje (ID INTEGER PRIMARY KEY, UnitateID REFERENCES Unitati (ID) ON DELETE RESTRICT ON UPDATE CASCADE, Denumire TEXT);
@@ -44,12 +47,18 @@ INSERT INTO Paturi (ID, Denumire, Locuri) VALUES (2, 'dublu', 2);
 
 -- Table: Rezervari
 CREATE TABLE Rezervari (ID INTEGER PRIMARY KEY, _ctime TEXT, _mtime TEXT, Status INTEGER);
+INSERT INTO Rezervari (ID, _ctime, _mtime, Status) VALUES (1, NULL, NULL, 1);
 
 -- Table: Rezervari_Spatii
-CREATE TABLE Rezervari_Spatii (ID INTEGER PRIMARY KEY, RezervareID INTEGER REFERENCES Rezervari (ID) ON DELETE RESTRICT ON UPDATE CASCADE, SpatiuID INTEGER REFERENCES Spatii (ID) ON DELETE RESTRICT ON UPDATE CASCADE);
+CREATE TABLE Rezervari_Spatii (ID INTEGER PRIMARY KEY, RezervareID INTEGER REFERENCES Rezervari (ID) ON DELETE CASCADE ON UPDATE CASCADE, SpatiuID INTEGER REFERENCES Spatii (ID) ON DELETE RESTRICT ON UPDATE CASCADE);
+INSERT INTO Rezervari_Spatii (ID, RezervareID, SpatiuID) VALUES (1, 1, 1);
+INSERT INTO Rezervari_Spatii (ID, RezervareID, SpatiuID) VALUES (2, 1, 2);
 
 -- Table: Rezervari_Spatii_Turisti
-CREATE TABLE Rezervari_Spatii_Turisti (ID INTEGER PRIMARY KEY, RezervareSpatiuID INTEGER REFERENCES Rezervari_Spatii (ID) ON DELETE RESTRICT ON UPDATE CASCADE, TuristID INTEGER REFERENCES Turisti (ID) ON DELETE RESTRICT ON UPDATE CASCADE, ScopSosire TEXT, DataInceput TEXT, DataSfarsit TEXT, NumarZile INTEGER, TarifPerZi REAL, TotalPlata REAL, NumarChitanta TEXT, Observatii);
+CREATE TABLE Rezervari_Spatii_Turisti (ID INTEGER PRIMARY KEY, RezervareSpatiuID INTEGER REFERENCES Rezervari_Spatii (ID) ON DELETE CASCADE ON UPDATE CASCADE, TuristID INTEGER REFERENCES Turisti (ID) ON DELETE RESTRICT ON UPDATE CASCADE, ScopSosire TEXT, DataInceput TEXT, DataSfarsit TEXT, NumarZile INTEGER, TarifPerZi REAL, TotalPlata REAL, NumarChitanta TEXT, Observatii);
+INSERT INTO Rezervari_Spatii_Turisti (ID, RezervareSpatiuID, TuristID, ScopSosire, DataInceput, DataSfarsit, NumarZile, TarifPerZi, TotalPlata, NumarChitanta, Observatii) VALUES (1, 1, 1, 'Misiune', '2022-01-22', '2022-01-23', 1, NULL, NULL, NULL, NULL);
+INSERT INTO Rezervari_Spatii_Turisti (ID, RezervareSpatiuID, TuristID, ScopSosire, DataInceput, DataSfarsit, NumarZile, TarifPerZi, TotalPlata, NumarChitanta, Observatii) VALUES (2, 1, 3, 'Misiune', '2022-01-22', '2022-01-23', 1, NULL, NULL, NULL, NULL);
+INSERT INTO Rezervari_Spatii_Turisti (ID, RezervareSpatiuID, TuristID, ScopSosire, DataInceput, DataSfarsit, NumarZile, TarifPerZi, TotalPlata, NumarChitanta, Observatii) VALUES (3, 2, 2, 'Interes personal', '2022-01-22', '2022-01-23', 1, NULL, NULL, NULL, NULL);
 
 -- Table: Spatii
 CREATE TABLE Spatii (ID INTEGER PRIMARY KEY, EtajID INTEGER REFERENCES Etaje (ID) ON DELETE RESTRICT ON UPDATE CASCADE, Numar TEXT, TipModulID INTEGER REFERENCES TipuriModul (ID) ON DELETE RESTRICT ON UPDATE CASCADE, Status INTEGER);
@@ -173,6 +182,11 @@ INSERT INTO TipuriModul (ID, ModulID, Paturi, PatID, ConfortID, Denumire) VALUES
 
 -- Table: Turisti
 CREATE TABLE Turisti (ID INTEGER PRIMARY KEY, CNP TEXT, Nume TEXT, Prenume TEXT, Grad TEXT, Institutie TEXT, NumarDocumentMilitar TEXT, SerieNumarCI TEXT, Nationalitate INTEGER);
+INSERT INTO Turisti (ID, CNP, Nume, Prenume, Grad, Institutie, NumarDocumentMilitar, SerieNumarCI, Nationalitate) VALUES (1, '1920923152504', 'Turist', 'Unu', 'Lt.', 'UM 01616', NULL, 'DD 891651', 1);
+INSERT INTO Turisti (ID, CNP, Nume, Prenume, Grad, Institutie, NumarDocumentMilitar, SerieNumarCI, Nationalitate) VALUES (2, '1931017152493', 'Turistescu', 'Doi', '-', 'Deloitte', NULL, 'DD 123456', 1);
+INSERT INTO Turisti (ID, CNP, Nume, Prenume, Grad, Institutie, NumarDocumentMilitar, SerieNumarCI, Nationalitate) VALUES (3, '2881113100185', 'Turistel', 'Trei', '-', 'Antena 1 TV', NULL, 'XZ 456789', 1);
+INSERT INTO Turisti (ID, CNP, Nume, Prenume, Grad, Institutie, NumarDocumentMilitar, SerieNumarCI, Nationalitate) VALUES (4, '1920924152505', 'Touristy', 'Four', '-', 'Microsoft', NULL, 'PQ 345678', 0);
+INSERT INTO Turisti (ID, CNP, Nume, Prenume, Grad, Institutie, NumarDocumentMilitar, SerieNumarCI, Nationalitate) VALUES (5, '1901212123456', 'Touriste', 'Cinque', '-', 'Avalon', NULL, 'YY 123456', 0);
 
 -- Table: Unitati
 CREATE TABLE Unitati (ID INTEGER PRIMARY KEY, Tip TEXT, Judet TEXT, Localitate TEXT, Strada TEXT, Numar TEXT, CodPostal TEXT, Telefon TEXT, Fax TEXT, Email TEXT, Website TEXT);
