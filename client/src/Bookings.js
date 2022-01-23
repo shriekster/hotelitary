@@ -314,7 +314,11 @@ export default function Bookings() {
   const handleEditBooking = async (bookingId) => {
         
     setEditingBookingId(bookingId); // bug here (??? editingBookingId does not update in time, most probably I do not yet fully understand React)
-    setLoading(true);
+    
+    if (!loading) {
+      setLoading(true);
+    }
+    
     
     const requestOptions = {
       method: 'GET',
@@ -432,6 +436,8 @@ export default function Bookings() {
       if (!err && response.ok) {
 
         setSnackbar({ children: json.message, severity: 'success' });
+        setEditingBookingData({});
+        setEditingBookingId(0);
 
         queueMicrotask(() => {
 
@@ -513,8 +519,6 @@ export default function Bookings() {
   
       } finally {
   
-        setLoading(false);
-  
         if (!err && response.ok) {
   
           setSnackbar({ children: json.message, severity: 'success' });
@@ -531,6 +535,7 @@ export default function Bookings() {
   
         } else {
   
+          setLoading(false);
           setSnackbar({ children: json.message, severity: 'error' });
   
         }
@@ -575,8 +580,6 @@ export default function Bookings() {
 
     } finally {
 
-      setLoading(false);
-
       if (!err && response.ok && !!json && !json.error) {
 
         setSnackbar({ children: json.message, severity: 'success' });
@@ -593,6 +596,7 @@ export default function Bookings() {
 
       } else {
 
+        setLoading(false);
         setSnackbar({ children: json.message, severity: 'error' });
 
       }
