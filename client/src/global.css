@@ -109,9 +109,32 @@ html {
 
   .Booking-room {
     width: 98%;
-    margin: 112px auto;
+    margin: 0 auto;
+    margin-top: 56px;
     border-radius: 4px;
     position: relative;    
-    height: calc(50vh - 56px);
+    height: calc(100vh - 304px);
+  }
+
+  .Booking-room-buttons {
+    height: 56px;
+    width: 50%;
+    position: absolute;
+    top: -56px;
+    left: 25%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .Booking-tourist-buttons {
+    height: 56px;
+    width: 50%;
+    position: absolute;
+    bottom: -56px;
+    left: 25%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 

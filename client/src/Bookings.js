@@ -13,6 +13,10 @@ import Dialog from '@mui/material/Dialog';
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import AddBoxIcon from '@mui/icons-material/AddBox';
 
 import DialogActions from '@mui/material/DialogActions';
 import AppBar from '@mui/material/AppBar';
@@ -91,8 +95,8 @@ export default function Bookings() {
     'Acord de reciprocitate',
     'Beneficiar gratuitate',
     'Interes personal',
-    'Permanent',
     'Altele',
+    //'Permanent',
   ];
 
   const scopuriSosireMap = {
@@ -101,8 +105,8 @@ export default function Bookings() {
     'Acord de reciprocitate': 3,
     'Beneficiar gratuitate': 4,
     'Interes personal': 5,
-    'Permanent': 6,
-    'Altele': 7,
+    'Altele': 6,
+    //'Permanent': 7,
   };
 
   const touristDataColumns = [
@@ -459,6 +463,7 @@ export default function Bookings() {
 
   const handleChangeTabIndex = (event, newIndex) => {
     setTabIndex(newIndex);
+    setSelectionModel([]);
   }
 
   useEffect(() => {
@@ -650,6 +655,30 @@ export default function Bookings() {
                 <TabPanel value={tabIndex} index={roomIndex}
                 key={`tab-panel-${editingBookingData[0].id}-${room.numar}`}>
                 <div className='Booking-room' >
+                  <div className='Booking-room-buttons'>
+                    <Tooltip title={<Typography variant='body2'>{`Șterge camera #${room.numar}`}</Typography>}
+                      arrow={true}
+                      placement='top'>
+                      <span>
+                        <IconButton
+                          disabled={loading}
+                          color='error'>
+                          <DeleteSweepIcon />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                    <Tooltip title={<Typography variant='body2'>{`Adaugă cameră`}</Typography>}
+                      arrow={true}
+                      placement='top'>
+                      <span>
+                        <IconButton
+                          disabled={loading}
+                          color='primary'>
+                          <AddBoxIcon />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                  </div>
                   <DataGrid sx={{
                       width: '100%',
                     }} 
@@ -684,6 +713,30 @@ export default function Bookings() {
                         <CircularProgress disableShrink/>
                       </div>
                     }
+                  <div className='Booking-tourist-buttons'>
+                    <Tooltip title={<Typography variant='body2'>{`Șterge turiști`}</Typography>}
+                        arrow={true}
+                        placement='top'>
+                        <span>
+                          <IconButton
+                            disabled={loading || selectionModel.length === 0}
+                            color='error'>
+                            <DeleteIcon />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                      <Tooltip title={<Typography variant='body2'>{`Adaugă turist`}</Typography>}
+                        arrow={true}
+                        placement='top'>
+                        <span>
+                          <IconButton
+                            disabled={loading}
+                            color='primary'>
+                            <PersonAddIcon />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                  </div>
                 </div>
                 </TabPanel>
               ))

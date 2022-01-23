@@ -1812,14 +1812,24 @@ const scopuriSosire = [
   'Altele',
 ];
 
+const scopuriSosire = [
+  'Misiune',
+  'Detașat',
+  'Acord de reciprocitate',
+  'Beneficiar gratuitate',
+  'Interes personal',
+  'Altele',
+  //'Permanent',
+];
+
 const scopuriSosireMap = {
   'Misiune': 1,
   'Detașat': 2,
   'Acord de reciprocitate': 3,
   'Beneficiar gratuitate': 4,
   'Interes personal': 5,
-  'Permanent': 6,
-  'Altele': 7,
+  'Altele': 6,
+  //'Permanent': 7,
 };
 
 /* GET booked dates */
