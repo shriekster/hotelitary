@@ -124,7 +124,7 @@ html {
     left: 25%;
     display: flex;
     align-items: center;
-    justify-content: space;
+    justify-content: space-between;
   }
 
   .Booking-tourist-buttons {

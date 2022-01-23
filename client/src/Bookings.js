@@ -17,6 +17,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import EditIcon from '@mui/icons-material/Edit';
 
 import DialogActions from '@mui/material/DialogActions';
 import AppBar from '@mui/material/AppBar';
@@ -538,7 +539,7 @@ export default function Bookings() {
 
   }
 
-  const handleDeleteRoom = () => {
+  const handleUpdateRoom = () => {
 
   }
 
@@ -741,14 +742,14 @@ export default function Bookings() {
                 key={`tab-panel-${editingBookingData[0].id}-${room.numar}`}>
                 <div className='Booking-room' >
                   <div className='Booking-room-buttons'>
-                    <Tooltip title={<Typography variant='body2'>{`Șterge camera #${room.numar}`}</Typography>}
+                    <Tooltip title={<Typography variant='body2'>{`Alege altă cameră`}</Typography>}
                       arrow={true}
                       placement='top'>
                       <span>
-                        <IconButton onClick={() => {handleDeleteRoom(editingBookingData[0].id, room.numar)}}
+                        <IconButton onClick={() => {handleUpdateRoom(editingBookingData[0].id, room.numar)}}
                           disabled={loading}
-                          color='error'>
-                          <DeleteSweepIcon />
+                          color='primary'>
+                          <EditIcon />
                         </IconButton>
                       </span>
                     </Tooltip>
