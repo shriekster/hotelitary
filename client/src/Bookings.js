@@ -309,7 +309,6 @@ export default function Bookings() {
   const handleEditBooking = async (bookingId) => {
         
     setEditingBookingId(bookingId); // bug here (??? editingBookingId does not update in time, most probably I do not yet fully understand React)
-    setOpenEditBooking(true);
     setLoading(true);
     
     const requestOptions = {
@@ -339,9 +338,16 @@ export default function Bookings() {
         
           const data = json.data;
 
-          if (data && data.booking) {
+          if (data && data.booking.length === 1) {
 
             setEditingBookingData(data.booking);
+            setOpenEditBooking(true);
+
+          } else {
+
+            setOpenEditBooking(false);
+            //setLoading(false);
+            setEditingBookingId(0);
 
           }
 
@@ -353,6 +359,7 @@ export default function Bookings() {
           const timeout = setTimeout(() => {
             setOpenEditBooking(false);
             setLoading(false);
+            setEditingBookingId(0);
             clearTimeout(timeout);
           }, 1000);
     
@@ -510,6 +517,8 @@ export default function Bookings() {
             await fetchBookedDates();
   
             await fetchBookings();
+
+            await handleEditBooking(bookingId);
   
           });
   

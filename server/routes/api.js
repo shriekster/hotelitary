@@ -2360,7 +2360,7 @@ router.put('/tourists/:id', function(req, res, next){
 
 });
 
-/* DELETE tourist from a booking */
+/* DELETE tourist from a booked room */
 router.delete('/hotels/:id/bookings/tourists', function(req, res, next) {
 
   const hotelId = req.params.id;
@@ -2374,7 +2374,8 @@ router.delete('/hotels/:id/bookings/tourists', function(req, res, next) {
 
     const selectDistributionIds = db.prepare(`
       SELECT 
-        Rezervari_Spatii_Turisti.ID AS id
+        Rezervari_Spatii_Turisti.ID AS id,
+        Rezervari_Spatii.ID AS rezervareSpatiuId
       FROM Rezervari_Spatii_Turisti
       INNER JOIN Rezervari ON Rezervari.ID = Rezervari_Spatii.RezervareID
       INNER JOIN Rezervari_Spatii ON Rezervari_Spatii.ID = Rezervari_Spatii_Turisti.RezervareSpatiuID
@@ -2389,7 +2390,33 @@ router.delete('/hotels/:id/bookings/tourists', function(req, res, next) {
       DELETE FROM Rezervari_Spatii_Turisti
       WHERE ID IN (?)`);
 
-    let distributionRows, selectStringParameter, deleteStringParameter, err;
+    const selectEmptyBookedRooms = db.prepare(`
+      SELECT ID AS id FROM 
+      (
+          SELECT 
+              Rezervari_Spatii.ID, Rezervari_Spatii_Turisti.RezervareSpatiuID
+          FROM Rezervari_Spatii
+          LEFT JOIN Rezervari_Spatii_Turisti ON Rezervari_Spatii_Turisti.RezervareSpatiuID = Rezervari_Spatii.ID
+      )
+      WHERE 
+          RezervareSpatiuID IS NULL
+      AND
+          ID IN (?)`);
+        
+    const deleteEmptyBookedRooms = db.prepare(`
+      DELETE FROM Rezervari_Spatii
+      WHERE ID IN (?)`);
+
+    const selectEmptyBookings = db.prepare(`
+      SELECT COUNT(ID) AS count FROM Rezervari_Spatii
+      WHERE Rezervari_Spatii.RezervareID = ?`);
+
+    const deleteEmptyBookings = db.prepare(`
+      DELETE FROM Rezervari
+      WHERE Rezervari.ID = ?`);
+
+    let distributionRows, bookedRoomIds = [], selectStringParameter, deleteStringParameter, emptyBookedRows, deleteEmptyBookedStringParameter, 
+      bookingRooms, err;
 
     try {
 
@@ -2401,11 +2428,33 @@ router.delete('/hotels/:id/bookings/tourists', function(req, res, next) {
         selectStringParameter
       );
 
+      bookedRoomIds = [...distributionRows.map((row) => row.rezervareSpatiuId)];
+
       deleteStringParameter = distributionRows.map((row) => row.id).join(',');
 
       deleteTouristsFromRoom.run(
         deleteStringParameter
       );
+
+      emptyBookedRows = selectEmptyBookedRooms.all(
+        bookedRoomIds.join(',')
+      );
+
+      deleteEmptyBookedStringParameter = emptyBookedRows.map((row) => row.id).join(',');
+
+      deleteEmptyBookedRooms.run(
+        deleteEmptyBookedStringParameter
+      );
+
+      bookingRooms = selectEmptyBookings.get(
+        Number(bookingId)
+      );
+
+      if (bookingRooms && !bookingRooms.count) {
+        deleteEmptyBookings.run(
+          Number(bookingId)
+        );
+      }
 
     } catch (error) {
 
@@ -2438,6 +2487,8 @@ router.delete('/hotels/:id/bookings/tourists', function(req, res, next) {
   }
 
 });
+
+/* DELETE a booked room entirely */
 
 /* Final route: handler for all the incorrect / invalid requests */
 router.all('*', function(req, res, next) {

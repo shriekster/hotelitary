@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.3.3 on Sat Jan 22 21:39:28 2022
+-- File generated with SQLiteStudio v3.3.3 on dum. ian. 23 15:40:55 2022
 --
 -- Text encoding used: UTF-8
 --
@@ -19,9 +19,6 @@ INSERT INTO Confort (ID, Denumire) VALUES (4, 'IV');
 
 -- Table: DateRezervari
 CREATE TABLE DateRezervari (ID INTEGER PRIMARY KEY, Data DATE);
-INSERT INTO DateRezervari (ID, Data) VALUES (1, '2022-01-01');
-INSERT INTO DateRezervari (ID, Data) VALUES (2, '2022-02-01');
-INSERT INTO DateRezervari (ID, Data) VALUES (3, '2022-03-01');
 
 -- Table: Etaje
 CREATE TABLE Etaje (ID INTEGER PRIMARY KEY, UnitateID REFERENCES Unitati (ID) ON DELETE RESTRICT ON UPDATE CASCADE, Denumire TEXT);
@@ -46,19 +43,16 @@ INSERT INTO Paturi (ID, Denumire, Locuri) VALUES (1, 'individual', 1);
 INSERT INTO Paturi (ID, Denumire, Locuri) VALUES (2, 'dublu', 2);
 
 -- Table: Rezervari
-CREATE TABLE Rezervari (ID INTEGER PRIMARY KEY, _ctime TEXT, _mtime TEXT, Status INTEGER);
-INSERT INTO Rezervari (ID, _ctime, _mtime, Status) VALUES (1, NULL, NULL, 1);
+CREATE TABLE Rezervari (ID INTEGER PRIMARY KEY, DataInceput TEXT, DataSfarsit TEXT, Status INTEGER);
+INSERT INTO Rezervari (ID, DataInceput, DataSfarsit, Status) VALUES (1, NULL, NULL, NULL);
 
 -- Table: Rezervari_Spatii
 CREATE TABLE Rezervari_Spatii (ID INTEGER PRIMARY KEY, RezervareID INTEGER REFERENCES Rezervari (ID) ON DELETE CASCADE ON UPDATE CASCADE, SpatiuID INTEGER REFERENCES Spatii (ID) ON DELETE RESTRICT ON UPDATE CASCADE);
 INSERT INTO Rezervari_Spatii (ID, RezervareID, SpatiuID) VALUES (1, 1, 1);
-INSERT INTO Rezervari_Spatii (ID, RezervareID, SpatiuID) VALUES (2, 1, 2);
 
 -- Table: Rezervari_Spatii_Turisti
 CREATE TABLE Rezervari_Spatii_Turisti (ID INTEGER PRIMARY KEY, RezervareSpatiuID INTEGER REFERENCES Rezervari_Spatii (ID) ON DELETE CASCADE ON UPDATE CASCADE, TuristID INTEGER REFERENCES Turisti (ID) ON DELETE RESTRICT ON UPDATE CASCADE, ScopSosire TEXT, DataInceput TEXT, DataSfarsit TEXT, NumarZile INTEGER, TarifPerZi REAL, TotalPlata REAL, NumarChitanta TEXT, Observatii);
-INSERT INTO Rezervari_Spatii_Turisti (ID, RezervareSpatiuID, TuristID, ScopSosire, DataInceput, DataSfarsit, NumarZile, TarifPerZi, TotalPlata, NumarChitanta, Observatii) VALUES (1, 1, 1, 'Misiune', '2022-01-22', '2022-01-23', 1, NULL, NULL, NULL, NULL);
-INSERT INTO Rezervari_Spatii_Turisti (ID, RezervareSpatiuID, TuristID, ScopSosire, DataInceput, DataSfarsit, NumarZile, TarifPerZi, TotalPlata, NumarChitanta, Observatii) VALUES (2, 1, 3, 'Misiune', '2022-01-22', '2022-01-23', 1, NULL, NULL, NULL, NULL);
-INSERT INTO Rezervari_Spatii_Turisti (ID, RezervareSpatiuID, TuristID, ScopSosire, DataInceput, DataSfarsit, NumarZile, TarifPerZi, TotalPlata, NumarChitanta, Observatii) VALUES (3, 2, 2, 'Interes personal', '2022-01-22', '2022-01-23', 1, NULL, NULL, NULL, NULL);
+INSERT INTO Rezervari_Spatii_Turisti (ID, RezervareSpatiuID, TuristID, ScopSosire, DataInceput, DataSfarsit, NumarZile, TarifPerZi, TotalPlata, NumarChitanta, Observatii) VALUES (1, 1, 1, NULL, '2021-01-23', '2021-01-23', 1, 10.0, 10.0, NULL, NULL);
 
 -- Table: Spatii
 CREATE TABLE Spatii (ID INTEGER PRIMARY KEY, EtajID INTEGER REFERENCES Etaje (ID) ON DELETE RESTRICT ON UPDATE CASCADE, Numar TEXT, TipModulID INTEGER REFERENCES TipuriModul (ID) ON DELETE RESTRICT ON UPDATE CASCADE, Status INTEGER);
@@ -70,7 +64,7 @@ INSERT INTO Spatii (ID, EtajID, Numar, TipModulID, Status) VALUES (5, 1, '5', 1,
 INSERT INTO Spatii (ID, EtajID, Numar, TipModulID, Status) VALUES (6, 1, '6', 1, 0);
 INSERT INTO Spatii (ID, EtajID, Numar, TipModulID, Status) VALUES (7, 1, '7', 1, 0);
 INSERT INTO Spatii (ID, EtajID, Numar, TipModulID, Status) VALUES (8, 1, '8', 1, 0);
-INSERT INTO Spatii (ID, EtajID, Numar, TipModulID, Status) VALUES (9, 1, '9', 1, 0);
+INSERT INTO Spatii (ID, EtajID, Numar, TipModulID, Status) VALUES (9, 1, '9', 5, 0);
 INSERT INTO Spatii (ID, EtajID, Numar, TipModulID, Status) VALUES (10, 1, '10', 1, 0);
 INSERT INTO Spatii (ID, EtajID, Numar, TipModulID, Status) VALUES (11, 1, '11', 1, 0);
 INSERT INTO Spatii (ID, EtajID, Numar, TipModulID, Status) VALUES (12, 1, '12', 1, 0);
