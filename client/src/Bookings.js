@@ -466,7 +466,62 @@ export default function Bookings() {
     setSelectionModel([]);
   }
 
-  const handleDeleteTourist = () => {
+  const handleDeleteTourists = async (bookingId, roomNumber, touristIds) => {
+
+    if (bookingId && roomNumber && touristIds && touristIds.length > 0) {
+
+      const requestOptions = {
+        method: 'DELETE',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bookingId: bookingId,
+          roomNumber: roomNumber,
+          touristIds: touristIds,
+        })
+      };
+  
+      let response, json, err;
+  
+      setLoading(true);
+  
+      try {
+  
+        response = await fetch(`/api/hotels/1/bookings/tourists`, requestOptions);
+  
+        json = await response.json();
+  
+      } catch (error) {
+  
+        err = error;
+  
+      } finally {
+  
+        setLoading(false);
+  
+        if (!err && response.ok) {
+  
+          setSnackbar({ children: json.message, severity: 'success' });
+  
+          queueMicrotask(async () => {
+  
+            await fetchBookedDates();
+  
+            await fetchBookings();
+  
+          });
+  
+        } else {
+  
+          setSnackbar({ children: json.message, severity: 'error' });
+  
+        }
+  
+      }
+
+    }
 
   }
 
@@ -739,7 +794,7 @@ export default function Bookings() {
                         arrow={true}
                         placement='top'>
                         <span>
-                          <IconButton onClick={() => {handleDeleteTourist(editingBookingData[0].id, room.numar, selectionModel)}}
+                          <IconButton onClick={() => {handleDeleteTourists(editingBookingData[0].id, room.numar, selectionModel)}}
                             disabled={loading || selectionModel.length === 0}
                             color='error'>
                             <DeleteIcon />

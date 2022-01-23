@@ -2090,7 +2090,7 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
         Spatii.Numar AS numarCamera, 
         (TipuriModul.Paturi * Paturi.Locuri) AS capacitate,
         Tarife.Valoare AS tarif,
-        ActualizariTarife.DATA AS valabilDin,
+        ActualizariTarife.Data AS valabilDin,
         Turisti.ID as turistId,
         Turisti.CNP AS cnp,
         Turisti.Nume AS nume,
@@ -2357,6 +2357,85 @@ router.get('/tourists/:id', function(req, res, next){
 
 /* PUT (UPDATE) tourist information */
 router.put('/tourists/:id', function(req, res, next){
+
+});
+
+/* DELETE tourist from a booking */
+router.delete('/hotels/:id/bookings/tourists', function(req, res, next) {
+
+  const hotelId = req.params.id;
+  const bookingId = req.body.bookingId;
+  const roomNumber = req.body.roomNumber;
+  const touristIds = [...req.body.touristIds];
+
+  const isValid = !isNaN(hotelId) && hotelId > 0 && !isNaN(bookingId) && bookingId > 0 && !!roomNumber && !!touristIds && touristIds.length > 0 && touristIds.every(id => id > 0);
+
+  if (isValid) {
+
+    const selectDistributionIds = db.prepare(`
+      SELECT 
+        Rezervari_Spatii_Turisti.ID AS id
+      FROM Rezervari_Spatii_Turisti
+      INNER JOIN Rezervari ON Rezervari.ID = Rezervari_Spatii.RezervareID
+      INNER JOIN Rezervari_Spatii ON Rezervari_Spatii.ID = Rezervari_Spatii_Turisti.RezervareSpatiuID
+      INNER JOIN Spatii ON Spatii.ID = Rezervari_Spatii.SpatiuID
+      INNER JOIN Turisti ON Turisti.ID = Rezervari_Spatii_Turisti.TuristID
+      WHERE 
+          Rezervari.ID = ?
+          AND Spatii.Numar = ?
+          AND Turisti.ID IN (?)`);
+
+    const deleteTouristsFromRoom = db.prepare(`
+      DELETE FROM Rezervari_Spatii_Turisti
+      WHERE ID IN (?)`);
+
+    let distributionRows, selectStringParameter, deleteStringParameter, err;
+
+    try {
+
+      selectStringParameter = touristIds.join(',');
+
+      distributionRows = selectDistributionIds.all(
+        Number(bookingId),
+        roomNumber.toString(),
+        selectStringParameter
+      );
+
+      deleteStringParameter = distributionRows.map((row) => row.id).join(',');
+
+      deleteTouristsFromRoom.run(
+        deleteStringParameter
+      );
+
+    } catch (error) {
+
+      err = error; console.log(error)
+
+    } finally {
+
+      if (!err) {
+        res.status(200).json({
+          data: null,
+          error: false,
+          message: 'Rezervare modificată (ștergere turiști)!'
+        });
+      } else {
+        res.status(404).json({
+          data: null,
+          error: true,
+          message: 'Eroare la ștergerea turiștilor, încearcă din nou!'
+        });
+      }
+
+    }
+
+  } else {
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Eroare la ștergerea turiștilor, încearcă din nou!'
+    });
+  }
 
 });
 
