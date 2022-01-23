@@ -346,6 +346,7 @@ export default function Bookings() {
           if (data && data.booking.length === 1) {
 
             setEditingBookingData(data.booking);
+            setAvailableRooms(data.availableRooms);
             setOpenEditBooking(true);
 
           } else {
@@ -544,7 +545,59 @@ export default function Bookings() {
 
   }
 
-  const handleUpdateRoom = async () => {
+  const handleUpdateRoom = async (bookingId, oldNumber, newNumber) => {
+  
+    let response, json, err;
+
+    setLoading(true);
+
+    try {
+
+      const requestOptions = {
+        method: 'PUT',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          oldNumber: oldNumber,
+          newNumber: newNumber,
+        })
+      };
+  
+      response = await fetch(`/api/hotels/1/bookings/${bookingId}`, requestOptions);
+
+      json = await response.json();
+
+    } catch (error) {
+
+      err = error;
+
+    } finally {
+
+      setLoading(false);
+
+      if (!err && response.ok && !!json && !json.error) {
+
+        setSnackbar({ children: json.message, severity: 'success' });
+
+        queueMicrotask(async () => {
+
+          await fetchBookedDates();
+
+          await fetchBookings();
+
+          await handleEditBooking(bookingId);
+
+        });
+
+      } else {
+
+        setSnackbar({ children: json.message, severity: 'error' });
+
+      }
+
+    }
 
   }
 
@@ -621,7 +674,7 @@ export default function Bookings() {
                   </TableHead>
                   {
                     bookings.map((booking, bookingIndex) => 
-                    {  console.log(booking)
+                    {
                       let firstCellRowSpan = 0;
                       for (let i = 0; i < booking.camere.length; i++) {
                         for (let j = 0; j < booking.camere[i].turisti.length; j++) {
@@ -756,10 +809,12 @@ export default function Bookings() {
                         disablePortal
                         disableClearable
                         noOptionsText='nu există'
-                        onChange={handleUpdateRoom}
+                        blurOnSelect
+                        value={room.numar}
+                        onChange={(event, newValue) => {handleUpdateRoom(editingBookingData[0].id, room.numar, newValue)}}
                         size='small'
                         id='available-rooms'
-                        options={availableRooms}
+                        options={[room.numar, ...availableRooms].sort((a,b) => a - b)}
                         sx={{ width: 250, marginLeft: '4px' }}
                         renderInput={(params) => <TextField {...params} label='Schimbă camera'/>}
                       />

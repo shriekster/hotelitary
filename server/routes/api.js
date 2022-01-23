@@ -2117,23 +2117,48 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
       AND ActualizariTarife.ID = ?
       ORDER BY 
           abs(Spatii.Numar) ASC`);
+
+      const selectAvailableRooms = db.prepare(`
+        SELECT Spatii.Numar AS numar FROM Spatii
+        WHERE Spatii.Numar NOT IN
+          (
+          SELECT Spatii.Numar FROM Spatii
+          JOIN Rezervari_Spatii ON Rezervari_Spatii.SpatiuID = Spatii.ID
+          JOIN Rezervari ON Rezervari.ID = Rezervari_Spatii.RezervareID
+          WHERE 
+              ? BETWEEN Rezervari.DataInceput AND Rezervari.DataSfarsit
+          OR
+              ? BETWEEN Rezervari.DataInceput AND Rezervari.DataSfarsit
+          )
+        ORDER BY abs(Spatii.Numar) ASC`);
    
-    let update, booking = [], bookingRows, err;
+    let update, booking = [], bookingRows, availableRoomsRows, availableRooms = [], err;
 
     try {
 
       update = selectLatestUpdate.get();
       bookingRows = selectBooking.all(bookingId, update.id);
 
+      const [start, end] = bookingRows[0].perioada.split(' - ');
+      const from = start.split('-').reverse().join('.');
+      const to = end.split('-').reverse().join('.');
+
+      const period = from !== to ? `${from} - ${to}` : `${to}`;
+
+      availableRoomsRows = selectAvailableRooms.all(start, end);
+      availableRooms = availableRoomsRows.map((row) => row.numar);
+
       for (let i = 0; i < bookingRows.length; i++) {
 
         const id = bookingRows[i].rezervareId;
 
+        /*
         const [start, end] = bookingRows[i].perioada.split(' - ');
         const from = start.split('-').reverse().join('.');
         const to = end.split('-').reverse().join('.');
 
         const period = from !== to ? `${from} - ${to}` : `${to}`;
+        */
 
         if (!booking.length) {
 
@@ -2261,6 +2286,7 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
         res.status(200).json({
           data: {
             booking: booking,
+            availableRooms: availableRooms,
           },
           error: false,
           message: 'OK!'
@@ -2290,8 +2316,62 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
 
 });
 
-/* PUT (UPDATE) booking */
-router.put('/hotels/:id/bookings/:id', function(req, res, next){
+/* PUT (UPDATE) a booking room */
+router.put('/hotels/:id/bookings/:bookingId', function(req, res, next){
+
+  const hotelId = req.params.id;
+  const bookingId = req.params.bookingId;
+
+  const { oldNumber, newNumber } = req.body;
+
+  const isValid = !isNaN(hotelId) && hotelId > 0 && !isNaN(bookingId) && bookingId > 0 && oldNumber !== '' && newNumber !== '';
+
+  if (isValid) {
+
+    const updateRoom = db.prepare(`
+      UPDATE Rezervari_Spatii
+      SET SpatiuID = (
+      SELECT ID FROM Spatii
+      WHERE Numar = ?)
+      WHERE SpatiuID = (
+      SELECT ID FROM Spatii
+      WHERE Numar = ?
+      )
+      AND RezervareID = ?`);
+
+      let info, err;
+
+      try {
+        info = updateRoom.run(
+          newNumber,
+          oldNumber,
+          Number(bookingId)
+        );console.log(info)
+      } catch(error) {
+        err = error;
+      } finally {
+        if (!err) {
+          res.status(200).json({
+            data: null,
+            error: false,
+            message: 'Rezervare modificată (modificare cameră)!'
+          });
+        } else {
+          res.status(404).json({
+            data: null,
+            error: true,
+            message: 'Eroare la actualizarea camerei!'
+          });
+        }
+      }
+
+  } else {
+    res.status(404).json({
+      data: null,
+      error: true,
+      message: 'Eroare la actualizarea camerei!'
+    });
+  }
 
 });
 
