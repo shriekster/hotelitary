@@ -1974,7 +1974,7 @@ router.get('/hotels/:id/bookings/preview/:date', function(req, res, next){
 
         } else {
 
-          const idIndex = bookings.map(record => record.id).indexOf(id);
+          const idIndex = bookings.map((record) => record.id).indexOf(id);
 
           if (idIndex >= 0) {
 
@@ -2012,6 +2012,7 @@ router.get('/hotels/:id/bookings/preview/:date', function(req, res, next){
 
             bookings.push({
               id: id,
+              perioada: period,
               camere: [{
                 numar: bookingsRows[i].numarCamera,
                 turisti: [{
@@ -2163,7 +2164,7 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
 
         } else {
 
-          const idIndex = booking.map(record => record.id).indexOf(id);
+          const idIndex = booking.map((record) => record.id).indexOf(id);
 
           if (idIndex >= 0) {
 
@@ -2195,7 +2196,6 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
 
               rooms.push({
                 numar: bookingRows[i].numarCamera,
-                perioada: bookingRows[i].perioada,
                 capacitate: bookingRows[i].capacitate,
                 tarif: bookingRows[i].tarif,
                 valabilitateTarif: bookingRows[i].valabilDin,

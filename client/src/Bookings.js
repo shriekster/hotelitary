@@ -621,7 +621,7 @@ export default function Bookings() {
                   </TableHead>
                   {
                     bookings.map((booking, bookingIndex) => 
-                    {  
+                    {  console.log(booking)
                       let firstCellRowSpan = 0;
                       for (let i = 0; i < booking.camere.length; i++) {
                         for (let j = 0; j < booking.camere[i].turisti.length; j++) {
