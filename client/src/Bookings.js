@@ -20,6 +20,9 @@ import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 import CloseIcon from '@mui/icons-material/Close';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -52,6 +55,33 @@ const TransitionLeft = forwardRef(function Transition(props, ref) {
 const TransitionUp = forwardRef(function Transition(props, ref) {
   return <Slide direction='up' ref={ref} {...props} />;
 });
+
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
+
+function a11yProps(index) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
+}
 
 export default function Bookings() {
 
@@ -111,6 +141,9 @@ export default function Bookings() {
   const [openAddBooking, setOpenAddBooking] = useState(false);
 
   const [selectionModel, setSelectionModel] = useState([]);
+
+  const [tabIndex, setTabIndex] = useState(0);
+  
 
   const datesAbortController = useRef(null);
 
@@ -424,6 +457,10 @@ export default function Bookings() {
 
   }
 
+  const handleChangeTabIndex = (event, newIndex) => {
+    setTabIndex(newIndex);
+  }
+
   useEffect(() => {
 
       fetchBookedDates();
@@ -594,48 +631,63 @@ export default function Bookings() {
           </Toolbar>
         </AppBar>
         <div className='Bookings-edit-container'>
-          {
+            <Tabs value={tabIndex} 
+              onChange={handleChangeTabIndex} 
+              sx={{width: '96%', margin: '0 auto'}}
+              variant='scrollable'
+              scrollButtons='auto'>
+            {
             !!editingBookingData[0] && !!editingBookingData[0].camere.length &&
-            editingBookingData[0].camere.map((room) => (
-              <div className='Booking-room' key={`${editingBookingData[0].id}-${room.numar}`}>
-                <Typography sx={{position: 'absolute', top: '-32px', left: '4px' }}>Camera #{room.numar}</Typography>
-                <DataGrid sx={{
-                    width: '100%',
-                  }} 
-                  rows={room.turisti} 
-                  columns={touristDataColumns}
-                  //onCellEditCommit={handleNewCellEditCommit}
-                  disableColumnMenu 
-                  hideFooterPagination 
-                  hideFooterSelectedRowCount
-                  localeText={{
-                    noRowsLabel: 'Nu există date'
-                  }}
-                  checkboxSelection
-                  disableSelectionOnClick
-                  onSelectionModelChange={handleSelectionModelChange}
-                  selectionModel={selectionModel}
-                  columnBuffer={2} 
-                  columnThreshold={2}/>
-                  {
-                    loading &&
-                    <div style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      height: '50vh',
-                      width: '100%',
-                      background: 'rgba(128, 128, 128, 0.25)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      <CircularProgress disableShrink/>
-                    </div>
-                  }
-              </div>
+            editingBookingData[0].camere.map((room, roomIndex) => (
+              <Tab label={`Camera #${room.numar}`} {...a11yProps(roomIndex)}
+                key={`tab-${editingBookingData[0].id}-${room.numar}`}/>
             ))
-          }
+            }
+            </Tabs>
+            {
+              !!editingBookingData[0] && !!editingBookingData[0].camere.length &&
+              editingBookingData[0].camere.map((room, roomIndex) => (
+                <TabPanel value={tabIndex} index={roomIndex}
+                key={`tab-panel-${editingBookingData[0].id}-${room.numar}`}>
+                <div className='Booking-room' >
+                  <DataGrid sx={{
+                      width: '100%',
+                    }} 
+                    rows={room.turisti} 
+                    columns={touristDataColumns}
+                    //onCellEditCommit={handleNewCellEditCommit}
+                    disableColumnMenu 
+                    hideFooterPagination 
+                    hideFooterSelectedRowCount
+                    localeText={{
+                      noRowsLabel: 'Nu există date'
+                    }}
+                    checkboxSelection
+                    disableSelectionOnClick
+                    onSelectionModelChange={handleSelectionModelChange}
+                    selectionModel={selectionModel}
+                    columnBuffer={2} 
+                    columnThreshold={2}/>
+                    {
+                      loading &&
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        height: '50vh',
+                        width: '100%',
+                        background: 'rgba(128, 128, 128, 0.25)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <CircularProgress disableShrink/>
+                      </div>
+                    }
+                </div>
+                </TabPanel>
+              ))
+            }
         </div>
         <DialogActions sx={{
             display: 'flex',
