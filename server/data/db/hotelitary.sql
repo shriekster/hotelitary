@@ -1,5 +1,5 @@
 --
--- File generated with SQLiteStudio v3.3.3 on dum. ian. 23 15:40:55 2022
+-- File generated with SQLiteStudio v3.3.3 on dum. ian. 23 17:32:51 2022
 --
 -- Text encoding used: UTF-8
 --
@@ -44,15 +44,18 @@ INSERT INTO Paturi (ID, Denumire, Locuri) VALUES (2, 'dublu', 2);
 
 -- Table: Rezervari
 CREATE TABLE Rezervari (ID INTEGER PRIMARY KEY, DataInceput TEXT, DataSfarsit TEXT, Status INTEGER);
-INSERT INTO Rezervari (ID, DataInceput, DataSfarsit, Status) VALUES (1, NULL, NULL, NULL);
+INSERT INTO Rezervari (ID, DataInceput, DataSfarsit, Status) VALUES (1, '2022-01-23', '2022-01-23', NULL);
+INSERT INTO Rezervari (ID, DataInceput, DataSfarsit, Status) VALUES (2, '2022-01-23', '2022-01-24', NULL);
 
 -- Table: Rezervari_Spatii
 CREATE TABLE Rezervari_Spatii (ID INTEGER PRIMARY KEY, RezervareID INTEGER REFERENCES Rezervari (ID) ON DELETE CASCADE ON UPDATE CASCADE, SpatiuID INTEGER REFERENCES Spatii (ID) ON DELETE RESTRICT ON UPDATE CASCADE);
-INSERT INTO Rezervari_Spatii (ID, RezervareID, SpatiuID) VALUES (1, 1, 1);
+INSERT INTO Rezervari_Spatii (ID, RezervareID, SpatiuID) VALUES (2, 1, 2);
+INSERT INTO Rezervari_Spatii (ID, RezervareID, SpatiuID) VALUES (3, 2, 3);
 
 -- Table: Rezervari_Spatii_Turisti
 CREATE TABLE Rezervari_Spatii_Turisti (ID INTEGER PRIMARY KEY, RezervareSpatiuID INTEGER REFERENCES Rezervari_Spatii (ID) ON DELETE CASCADE ON UPDATE CASCADE, TuristID INTEGER REFERENCES Turisti (ID) ON DELETE RESTRICT ON UPDATE CASCADE, ScopSosire TEXT, DataInceput TEXT, DataSfarsit TEXT, NumarZile INTEGER, TarifPerZi REAL, TotalPlata REAL, NumarChitanta TEXT, Observatii);
-INSERT INTO Rezervari_Spatii_Turisti (ID, RezervareSpatiuID, TuristID, ScopSosire, DataInceput, DataSfarsit, NumarZile, TarifPerZi, TotalPlata, NumarChitanta, Observatii) VALUES (1, 1, 1, NULL, '2021-01-23', '2021-01-23', 1, 10.0, 10.0, NULL, NULL);
+INSERT INTO Rezervari_Spatii_Turisti (ID, RezervareSpatiuID, TuristID, ScopSosire, DataInceput, DataSfarsit, NumarZile, TarifPerZi, TotalPlata, NumarChitanta, Observatii) VALUES (2, 2, 2, '1', '2022-01-23', '2022-01-23', 1, 10.0, 10.0, NULL, NULL);
+INSERT INTO Rezervari_Spatii_Turisti (ID, RezervareSpatiuID, TuristID, ScopSosire, DataInceput, DataSfarsit, NumarZile, TarifPerZi, TotalPlata, NumarChitanta, Observatii) VALUES (3, 3, 3, '1', NULL, NULL, 1, 20.0, 20.0, NULL, NULL);
 
 -- Table: Spatii
 CREATE TABLE Spatii (ID INTEGER PRIMARY KEY, EtajID INTEGER REFERENCES Etaje (ID) ON DELETE RESTRICT ON UPDATE CASCADE, Numar TEXT, TipModulID INTEGER REFERENCES TipuriModul (ID) ON DELETE RESTRICT ON UPDATE CASCADE, Status INTEGER);

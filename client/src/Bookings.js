@@ -143,8 +143,6 @@ export default function Bookings() {
   const [editingBookingId, setEditingBookingId] = useState(0);
   const [editingBookingData, setEditingBookingData] = useState({});
 
-  const [editRoom, setEditRoom] = useState(false);
-
   const [availableRooms, setAvailableRooms] = useState([]);
 
   const [openAddBooking, setOpenAddBooking] = useState(false);
@@ -392,7 +390,6 @@ export default function Bookings() {
   const handleCancelEditBooking = () => {
     setEditingBookingId(0);
     setOpenEditBooking(false);
-    setEditRoom(false);
     setPendingChanges(false);
   }
 
@@ -544,14 +541,6 @@ export default function Bookings() {
   }
 
   const handleAddTourist = () => {
-
-  }
-
-  const handleEditRoom = () => {
-
-    if (!editRoom) {
-      setEditRoom(true);
-    }
 
   }
 
@@ -763,28 +752,16 @@ export default function Bookings() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'}}>
-                      <Tooltip title={<Typography variant='body2'>{`Alege altă cameră`}</Typography>}
-                        arrow={true}
-                        placement='top'>
-                        <span>
-                          <IconButton onClick={handleEditRoom}
-                            disabled={loading}
-                            color='primary'>
-                            <EditIcon />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
                       <Autocomplete
                         disablePortal
                         disableClearable
                         noOptionsText='nu există'
                         onChange={handleUpdateRoom}
-                        disabled={!editRoom}
                         size='small'
                         id='available-rooms'
                         options={availableRooms}
                         sx={{ width: 250, marginLeft: '4px' }}
-                        renderInput={(params) => <TextField {...params} label='Camere disponibile'/>}
+                        renderInput={(params) => <TextField {...params} label='Schimbă camera'/>}
                       />
                     </div>
                     <Tooltip title={<Typography variant='body2'>{`Adaugă cameră`}</Typography>}
