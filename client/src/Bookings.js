@@ -143,11 +143,17 @@ export default function Bookings() {
   const [editingBookingId, setEditingBookingId] = useState(0);
   const [editingBookingData, setEditingBookingData] = useState({});
 
+  const [editRoom, setEditRoom] = useState(false);
+
+  const [availableRooms, setAvailableRooms] = useState([]);
+
   const [openAddBooking, setOpenAddBooking] = useState(false);
 
   const [selectionModel, setSelectionModel] = useState([]);
 
   const [tabIndex, setTabIndex] = useState(0);
+
+  const [pendingChanges, setPendingChanges] = useState(false);
   
 
   const datesAbortController = useRef(null);
@@ -251,7 +257,7 @@ export default function Bookings() {
         
           const data = json.data;
 
-          if (data && data.bookings) {
+          if (data && data.bookings && data.bookings.length > 0) {
 
             setBookings((prevBookings) => ([...data.bookings]));
 
@@ -386,6 +392,8 @@ export default function Bookings() {
   const handleCancelEditBooking = () => {
     setEditingBookingId(0);
     setOpenEditBooking(false);
+    setEditRoom(false);
+    setPendingChanges(false);
   }
 
   const handleUpdateBooking = async () => {
@@ -539,7 +547,15 @@ export default function Bookings() {
 
   }
 
-  const handleUpdateRoom = () => {
+  const handleEditRoom = () => {
+
+    if (!editRoom) {
+      setEditRoom(true);
+    }
+
+  }
+
+  const handleUpdateRoom = async () => {
 
   }
 
@@ -638,7 +654,7 @@ export default function Bookings() {
                                 <TableCell align='center' rowSpan={secondCellRowSpan}>{room.numar}</TableCell>
                                 <TableCell align='center'>{tourist.numeComplet}</TableCell>
                                 <TableCell align='center'>{tourist.scopSosire}</TableCell>
-                                <TableCell align='center'>{tourist.perioada}</TableCell>
+                                <TableCell align='center'>{booking.perioada}</TableCell>
                                 <TableCell align='center'>{tourist.totalPlata}</TableCell>
                               </TableRow>
                             ) : (
@@ -647,14 +663,14 @@ export default function Bookings() {
                                   <TableCell align='center' rowSpan={secondCellRowSpan}>{room.numar}</TableCell>
                                   <TableCell align='center'>{tourist.numeComplet}</TableCell>
                                   <TableCell align='center'>{tourist.scopSosire}</TableCell>
-                                  <TableCell align='center'>{tourist.perioada}</TableCell>
+                                  <TableCell align='center'>{booking.perioada}</TableCell>
                                   <TableCell align='center'>{tourist.totalPlata}</TableCell>
                                 </TableRow>
                               ) : (
                                 <TableRow key={`${booking.id}-${tourist.id}`}>
                                   <TableCell align='center'>{tourist.numeComplet}</TableCell>
                                   <TableCell align='center'>{tourist.scopSosire}</TableCell>
-                                  <TableCell align='center'>{tourist.perioada}</TableCell>
+                                  <TableCell align='center'>{booking.perioada}</TableCell>
                                   <TableCell align='center'>{tourist.totalPlata}</TableCell>
                                 </TableRow>
                               )
@@ -742,17 +758,35 @@ export default function Bookings() {
                 key={`tab-panel-${editingBookingData[0].id}-${room.numar}`}>
                 <div className='Booking-room' >
                   <div className='Booking-room-buttons'>
-                    <Tooltip title={<Typography variant='body2'>{`Alege altă cameră`}</Typography>}
-                      arrow={true}
-                      placement='top'>
-                      <span>
-                        <IconButton onClick={() => {handleUpdateRoom(editingBookingData[0].id, room.numar)}}
-                          disabled={loading}
-                          color='primary'>
-                          <EditIcon />
-                        </IconButton>
-                      </span>
-                    </Tooltip>
+                    <div style={{
+                      height: '56px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'}}>
+                      <Tooltip title={<Typography variant='body2'>{`Alege altă cameră`}</Typography>}
+                        arrow={true}
+                        placement='top'>
+                        <span>
+                          <IconButton onClick={handleEditRoom}
+                            disabled={loading}
+                            color='primary'>
+                            <EditIcon />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                      <Autocomplete
+                        disablePortal
+                        disableClearable
+                        noOptionsText='nu există'
+                        onChange={handleUpdateRoom}
+                        disabled={!editRoom}
+                        size='small'
+                        id='available-rooms'
+                        options={availableRooms}
+                        sx={{ width: 250, marginLeft: '4px' }}
+                        renderInput={(params) => <TextField {...params} label='Camere disponibile'/>}
+                      />
+                    </div>
                     <Tooltip title={<Typography variant='body2'>{`Adaugă cameră`}</Typography>}
                       arrow={true}
                       placement='top'>
@@ -838,7 +872,7 @@ export default function Bookings() {
             variant='contained'
             color='primary'
             onClick={handleUpdateBooking}
-            disabled={loading}>
+            disabled={loading || !pendingChanges}>
             Salvează
           </Button>
           <Button variant='contained'

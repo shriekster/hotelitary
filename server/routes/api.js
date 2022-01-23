@@ -1927,7 +1927,7 @@ router.get('/hotels/:id/bookings/preview/:date', function(req, res, next){
       Turisti.ID as turistId,
       (Turisti.Nume || ' ' || Turisti.Prenume) AS numeComplet, 
       Rezervari_Spatii_Turisti.ScopSosire AS scopSosire, 
-      (Rezervari_Spatii_Turisti.DataInceput || ' - ' || Rezervari_Spatii_Turisti.DataSfarsit) AS perioada, 
+      (Rezervari.DataInceput || ' - ' || Rezervari.DataSfarsit) AS perioada, 
       Rezervari_Spatii_Turisti.TotalPlata AS totalPlata
       FROM Rezervari_Spatii_Turisti
       INNER JOIN Rezervari_Spatii ON Rezervari_Spatii.ID = Rezervari_Spatii_Turisti.RezervareSpatiuID
@@ -1935,7 +1935,7 @@ router.get('/hotels/:id/bookings/preview/:date', function(req, res, next){
       INNER JOIN Spatii ON Spatii.ID = Rezervari_Spatii.SpatiuID
       INNER JOIN Turisti ON Turisti.ID = Rezervari_Spatii_Turisti.TuristID
       AND
-          ? BETWEEN Rezervari_Spatii_Turisti.DataInceput AND Rezervari_Spatii_Turisti.DataSfarsit
+          ? BETWEEN Rezervari.DataInceput AND Rezervari.DataSfarsit
       ORDER BY 
           Rezervari.ID ASC, 
           abs(Spatii.Numar) ASC`);
@@ -1953,19 +1953,20 @@ router.get('/hotels/:id/bookings/preview/:date', function(req, res, next){
         const [start, end] = bookingsRows[i].perioada.split(' - ');
         const from = start.split('-').reverse().join('.');
         const to = end.split('-').reverse().join('.');
-        const period = `${from} - ${to}`;
+
+        const period = from !== to ? `${from} - ${to}` : `${to}`;
 
         if (!bookings.length) {
 
           bookings.push({
             id: id,
+            perioada: period,
             camere: [{
               numar: bookingsRows[i].numarCamera,
               turisti: [{
                 id: bookingsRows[i].turistId,
                 numeComplet: bookingsRows[i].numeComplet,
                 scopSosire: bookingsRows[i].scopSosire,
-                perioada: period,
                 totalPlata: bookingsRows[i].totalPlata,
               }]
             }]
@@ -1990,7 +1991,6 @@ router.get('/hotels/:id/bookings/preview/:date', function(req, res, next){
                 id: bookingsRows[i].turistId,
                 numeComplet: bookingsRows[i].numeComplet,
                 scopSosire: bookingsRows[i].scopSosire,
-                perioada: period,
                 totalPlata: bookingsRows[i].totalPlata,
               });
 
@@ -2002,7 +2002,6 @@ router.get('/hotels/:id/bookings/preview/:date', function(req, res, next){
                   id: bookingsRows[i].turistId,
                   numeComplet: bookingsRows[i].numeComplet,
                   scopSosire: bookingsRows[i].scopSosire,
-                  perioada: period,
                   totalPlata: bookingsRows[i].totalPlata,
                 }]
               });
@@ -2100,7 +2099,7 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
         Turisti.NumarDocumentMilitar AS numarDocumentMilitar,
         Turisti.SerieNumarCI AS serieNumarCI,
         Rezervari_Spatii_Turisti.ScopSosire AS scopSosire, 
-        (Rezervari_Spatii_Turisti.DataInceput || ' - ' || Rezervari_Spatii_Turisti.DataSfarsit) AS perioada, 
+        (Rezervari.DataInceput || ' - ' || Rezervari.DataSfarsit) AS perioada, 
         Rezervari_Spatii_Turisti.NumarZile AS numarZile,
         Rezervari_Spatii_Turisti.TotalPlata AS totalPlata
       FROM Rezervari_Spatii_Turisti
@@ -2129,10 +2128,17 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
 
         const id = bookingRows[i].rezervareId;
 
+        const [start, end] = bookingRows[i].perioada.split(' - ');
+        const from = start.split('-').reverse().join('.');
+        const to = end.split('-').reverse().join('.');
+
+        const period = from !== to ? `${from} - ${to}` : `${to}`;
+
         if (!booking.length) {
 
           booking.push({
             id: id,
+            perioada: period,
             camere: [{
               numar: bookingRows[i].numarCamera,
               capacitate: bookingRows[i].capacitate,
@@ -2148,7 +2154,7 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
                 numarDocumentMilitar: bookingRows[i].numarDocumentMilitar,
                 serieNumarCI: bookingRows[i].serieNumarCI,
                 scopSosire: bookingRows[i].scopSosire,
-                perioada: bookingRows[i].perioada,
+                perioada: period,
                 numarZile: bookingRows[i].numarZile,
                 totalPlata: bookingRows[i].totalPlata,
               }]
@@ -2180,7 +2186,7 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
                 numarDocumentMilitar: bookingRows[i].numarDocumentMilitar,
                 serieNumarCI: bookingRows[i].serieNumarCI,
                 scopSosire: bookingRows[i].scopSosire,
-                perioada: bookingRows[i].perioada,
+                perioada: period,
                 numarZile: bookingRows[i].numarZile,
                 totalPlata: bookingRows[i].totalPlata,
               });
@@ -2189,6 +2195,7 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
 
               rooms.push({
                 numar: bookingRows[i].numarCamera,
+                perioada: bookingRows[i].perioada,
                 capacitate: bookingRows[i].capacitate,
                 tarif: bookingRows[i].tarif,
                 valabilitateTarif: bookingRows[i].valabilDin,
@@ -2202,7 +2209,7 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
                   numarDocumentMilitar: bookingRows[i].numarDocumentMilitar,
                   serieNumarCI: bookingRows[i].serieNumarCI,
                   scopSosire: bookingRows[i].scopSosire,
-                  perioada: bookingRows[i].perioada,
+                  perioada: period,
                   numarZile: bookingRows[i].numarZile,
                   totalPlata: bookingRows[i].totalPlata,
                 }]
@@ -2214,6 +2221,7 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
 
             booking.push({
               id: id,
+              perioada: period,
               camere: [{
                 numar: bookingRows[i].numarCamera,
                 capacitate: bookingRows[i].capacitate,
@@ -2229,7 +2237,7 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
                   numarDocumentMilitar: bookingRows[i].numarDocumentMilitar,
                   serieNumarCI: bookingRows[i].serieNumarCI,
                   scopSosire: bookingRows[i].scopSosire,
-                  perioada: bookingRows[i].perioada,
+                  perioada: period,
                   numarZile: bookingRows[i].numarZile,
                   totalPlata: bookingRows[i].totalPlata,
                 }]
