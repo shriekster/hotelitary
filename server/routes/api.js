@@ -2033,7 +2033,7 @@ router.get('/hotels/:id/bookings/preview/:date', function(req, res, next){
 
     } catch (error) {
 
-      err = error;
+      err = error;console.log(error)
 
     } finally {
 
@@ -2083,7 +2083,7 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
     const selectLatestUpdate = db.prepare(`
       SELECT ID AS id, max(Data) AS validFrom
       FROM ActualizariTarife`);
-
+    // BUG: daca nu am introdus tarife in cel mai recent set de actualizari => da rezultate gresite
     const selectBooking = db.prepare(`
       SELECT
         Rezervari.ID AS rezervareId,
@@ -2132,21 +2132,27 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
           )
         ORDER BY abs(Spatii.Numar) ASC`);
    
-    let update, booking = [], bookingRows, availableRoomsRows, availableRooms = [], err;
+    let update, booking = [], bookingRows, availableRoomsRows, availableRooms = [], period, err;
 
     try {
 
       update = selectLatestUpdate.get();
       bookingRows = selectBooking.all(bookingId, update.id);
+      //bookingRows = selectBooking.all(bookingId);
+      console.log(bookingRows)
 
-      const [start, end] = bookingRows[0].perioada.split(' - ');
-      const from = start.split('-').reverse().join('.');
-      const to = end.split('-').reverse().join('.');
+      if(bookingRows.length > 0) {
 
-      const period = from !== to ? `${from} - ${to}` : `${to}`;
+        const [start, end] = bookingRows[0].perioada.split(' - ');
+        const from = start.split('-').reverse().join('.');
+        const to = end.split('-').reverse().join('.');
 
-      availableRoomsRows = selectAvailableRooms.all(start, end);
-      availableRooms = availableRoomsRows.map((row) => row.numar);
+        period = from !== to ? `${from} - ${to}` : `${to}`;
+
+        availableRoomsRows = selectAvailableRooms.all(start, end);
+        availableRooms = availableRoomsRows.map((row) => row.numar);
+
+        }
 
       for (let i = 0; i < bookingRows.length; i++) {
 

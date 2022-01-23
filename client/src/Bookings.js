@@ -255,7 +255,7 @@ export default function Bookings() {
         
           const data = json.data;
 
-          if (data && data.bookings && data.bookings.length > 0) {
+          if (data && data.bookings && data.bookings) {
 
             setBookings((prevBookings) => ([...data.bookings]));
 
@@ -314,7 +314,7 @@ export default function Bookings() {
   const handleEditBooking = async (bookingId) => {
         
     setEditingBookingId(bookingId); // bug here (??? editingBookingId does not update in time, most probably I do not yet fully understand React)
-    
+
     if (!loading) {
       setLoading(true);
     }
@@ -345,13 +345,24 @@ export default function Bookings() {
 
         if (response.ok) {
         
-          const data = json.data;
+          const data = json.data;console.log(data)
 
           if (data && data.booking.length === 1) {
 
             setEditingBookingData(data.booking);
             setAvailableRooms(data.availableRooms);
-            setOpenEditBooking(true);
+
+            if (!openEditBooking) {
+
+              setOpenEditBooking(true);
+
+            }
+            
+            if (!!data && !!data.booking && !!data.booking.camere && data.booking.camere.length === 1) {
+
+              setTabIndex(0);
+
+            }
 
           } else {
 
@@ -523,15 +534,11 @@ export default function Bookings() {
   
           setSnackbar({ children: json.message, severity: 'success' });
   
-          queueMicrotask(async () => {
-  
             await fetchBookedDates();
   
             await fetchBookings();
 
             await handleEditBooking(bookingId);
-  
-          });
   
         } else {
   
