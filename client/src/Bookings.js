@@ -466,6 +466,22 @@ export default function Bookings() {
     setSelectionModel([]);
   }
 
+  const handleDeleteTourist = () => {
+
+  }
+
+  const handleAddTourist = () => {
+
+  }
+
+  const handleDeleteRoom = () => {
+
+  }
+
+  const handleAddRoom = () => {
+
+  }
+
   useEffect(() => {
 
       fetchBookedDates();
@@ -644,8 +660,13 @@ export default function Bookings() {
             {
             !!editingBookingData[0] && !!editingBookingData[0].camere.length &&
             editingBookingData[0].camere.map((room, roomIndex) => (
-              <Tab label={`Camera #${room.numar}`} {...a11yProps(roomIndex)}
-                key={`tab-${editingBookingData[0].id}-${room.numar}`}/>
+              <Tooltip title={<Typography variant='body2'>{`Tarif: ${room.tarif} RON, valabil din ${new Date(room.valabilitateTarif).toLocaleDateString('ro-RO')}`}</Typography>}
+                key={`tooltip-${editingBookingData[0].id}-${room.numar}`}
+                arrow={true}
+                placement='bottom-end'>
+                <Tab label={`Camera #${room.numar}`} {...a11yProps(roomIndex)}
+                  key={`tab-${editingBookingData[0].id}-${room.numar}`}/>
+              </Tooltip>
             ))
             }
             </Tabs>
@@ -660,7 +681,7 @@ export default function Bookings() {
                       arrow={true}
                       placement='top'>
                       <span>
-                        <IconButton
+                        <IconButton onClick={() => {handleDeleteRoom(editingBookingData[0].id, room.numar)}}
                           disabled={loading}
                           color='error'>
                           <DeleteSweepIcon />
@@ -671,7 +692,7 @@ export default function Bookings() {
                       arrow={true}
                       placement='top'>
                       <span>
-                        <IconButton
+                        <IconButton onClick={() => {handleAddRoom(editingBookingData[0].id)}}
                           disabled={loading}
                           color='primary'>
                           <AddBoxIcon />
@@ -718,7 +739,7 @@ export default function Bookings() {
                         arrow={true}
                         placement='top'>
                         <span>
-                          <IconButton
+                          <IconButton onClick={() => {handleDeleteTourist(editingBookingData[0].id, room.numar, selectionModel)}}
                             disabled={loading || selectionModel.length === 0}
                             color='error'>
                             <DeleteIcon />
@@ -729,8 +750,8 @@ export default function Bookings() {
                         arrow={true}
                         placement='top'>
                         <span>
-                          <IconButton
-                            disabled={loading}
+                          <IconButton onClick={() => handleAddTourist(editingBookingData[0].id, room.numar)}
+                            disabled={loading || room.turisti.length === room.capacitate}
                             color='primary'>
                             <PersonAddIcon />
                           </IconButton>

@@ -1808,16 +1808,6 @@ const scopuriSosire = [
   'Acord de reciprocitate',
   'Beneficiar gratuitate',
   'Interes personal',
-  'Permanent',
-  'Altele',
-];
-
-const scopuriSosire = [
-  'Misiune',
-  'Detașat',
-  'Acord de reciprocitate',
-  'Beneficiar gratuitate',
-  'Interes personal',
   'Altele',
   //'Permanent',
 ];
@@ -2090,10 +2080,17 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
 
   if (isValid) {
 
+    const selectLatestUpdate = db.prepare(`
+      SELECT ID AS id, max(Data) AS validFrom
+      FROM ActualizariTarife`);
+
     const selectBooking = db.prepare(`
       SELECT
         Rezervari.ID AS rezervareId,
         Spatii.Numar AS numarCamera, 
+        (TipuriModul.Paturi * Paturi.Locuri) AS capacitate,
+        Tarife.Valoare AS tarif,
+        ActualizariTarife.DATA AS valabilDin,
         Turisti.ID as turistId,
         Turisti.CNP AS cnp,
         Turisti.Nume AS nume,
@@ -2110,17 +2107,23 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
       INNER JOIN Rezervari_Spatii ON Rezervari_Spatii.ID = Rezervari_Spatii_Turisti.RezervareSpatiuID
       INNER JOIN Rezervari ON Rezervari.ID = Rezervari_Spatii.RezervareID
       INNER JOIN Spatii ON Spatii.ID = Rezervari_Spatii.SpatiuID
+      INNER JOIN TipuriModul ON TipuriModul.ID = Spatii.TipModulID
+      INNER JOIN Paturi ON Paturi.ID = TipuriModul.PatID
+      INNER JOIN Tarife ON Tarife.TipModulID = Spatii.TipModulID
+      INNER JOIN ActualizariTarife ON ActualizariTarife.ID = Tarife.ActualizareID
       INNER JOIN Turisti ON Turisti.ID = Rezervari_Spatii_Turisti.TuristID
       WHERE 
           Rezervari.ID = ?
+      AND ActualizariTarife.ID = ?
       ORDER BY 
           abs(Spatii.Numar) ASC`);
    
-    let booking = [], bookingRows, err;
+    let update, booking = [], bookingRows, err;
 
     try {
 
-      bookingRows = selectBooking.all(bookingId);
+      update = selectLatestUpdate.get();
+      bookingRows = selectBooking.all(bookingId, update.id);
 
       for (let i = 0; i < bookingRows.length; i++) {
 
@@ -2132,6 +2135,9 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
             id: id,
             camere: [{
               numar: bookingRows[i].numarCamera,
+              capacitate: bookingRows[i].capacitate,
+              tarif: bookingRows[i].tarif,
+              valabilitateTarif: bookingRows[i].valabilDin,
               turisti: [{
                 id: bookingRows[i].turistId,
                 cnp: bookingRows[i].cnp,
@@ -2183,6 +2189,9 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
 
               rooms.push({
                 numar: bookingRows[i].numarCamera,
+                capacitate: bookingRows[i].capacitate,
+                tarif: bookingRows[i].tarif,
+                valabilitateTarif: bookingRows[i].valabilDin,
                 turisti: [{
                   id: bookingRows[i].turistId,
                   cnp: bookingRows[i].cnp,
@@ -2207,6 +2216,9 @@ router.get('/hotels/:id/bookings/:bookingId', function(req, res, next){
               id: id,
               camere: [{
                 numar: bookingRows[i].numarCamera,
+                capacitate: bookingRows[i].capacitate,
+                tarif: bookingRows[i].tarif,
+                valabilitateTarif: bookingRows[i].valabilDin,
                 turisti: [{
                   id: bookingRows[i].turistId,
                   cnp: bookingRows[i].cnp,
